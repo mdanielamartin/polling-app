@@ -1,5 +1,5 @@
 from marshmallow import Schema, fields, validates, ValidationError
-from marshmallow.validate import Length
+from marshmallow.validate import Length, Range
 
 
 
@@ -9,4 +9,4 @@ class UserSchema(Schema):
 
 class PollSchema(Schema):
     name = fields.Str(required=True, validate=Length(min=3, max=255))
-    time_limit_days = fields.Int(required=True, validate=Length(min=1,max=30))
+    time_limit_days = fields.Int(required=True, validate=Range(min=1,max=30))

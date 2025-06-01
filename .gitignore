@@ -45,8 +45,11 @@ frontend/.env
 frontend/.next/
 
 # Bytecode files
-__pycache__/
+backend/__pycache__/
 *.py[cod]
+*.pyc
+*.pyo
+
 
 # Virtual environments
 venv/

@@ -54,8 +54,8 @@ def create_poll():
     user_id = get_jwt_identity()
     if not user_id:
         return jsonify({"error": "User not found"}), 404
-    check_user = check_user(user_id)
-    if not check_user:
+    auth = check_user(user_id)
+    if not auth:
         return jsonify({"error": "User not found"}), 404
     try:
         data = request.json
@@ -64,7 +64,7 @@ def create_poll():
     except ValidationError as e:
         return jsonify({"error": e.messages}), 400
     try:
-        poll = Poll(validated_data)
+        poll = Poll(name=validated_data["name"],time_limit_days=validated_data["time_limit_days"], user_id=user_id)
         db.session.add(poll)
         db.session.commit()
         return jsonify({"id":poll.id}), 200
@@ -75,11 +75,12 @@ def create_poll():
 @jwt_required()
 def get_polls():
     user_id = get_jwt_identity()
-    check_user = check_user(user_id)
-    if not check_user:
+    auth = check_user(user_id)
+    if not auth:
         return jsonify({"error": "User not found"}), 404
     try:
         polls = Poll.query.filter_by(user_id=user_id).all()
-        return jsonify(polls), 200
+        poll_list = [poll.serialize() for poll in polls]
+        return jsonify(poll_list), 200
     except Exception as e:
         return jsonify({"error":str(e)}), 500
