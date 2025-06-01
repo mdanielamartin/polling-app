@@ -43,3 +43,30 @@ next-env.d.ts
 frontend/node_modules/
 frontend/.env
 frontend/.next/
+
+# Bytecode files
+backend/__pycache__/
+*.py[cod]
+*.pyc
+*.pyo
+
+
+# Virtual environments
+venv/
+.env/
+*.venv
+
+# Cache files
+*.log
+*.cache
+*.sqlite
+*.db
+
+# IDE-related files
+.vscode/
+.idea/
+*.iml
+
+# Flask & database migrations
+instance/
+migrations/
