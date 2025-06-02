@@ -52,8 +52,6 @@ def login_user():
 @jwt_required()
 def create_poll():
     user_id = get_jwt_identity()
-    if not user_id:
-        return jsonify({"error": "User not found"}), 404
     auth = check_user(user_id)
     if not auth:
         return jsonify({"error": "User not found"}), 404
@@ -82,5 +80,49 @@ def get_polls():
         polls = Poll.query.filter_by(user_id=user_id).all()
         poll_list = [poll.serialize() for poll in polls]
         return jsonify(poll_list), 200
+    except Exception as e:
+        return jsonify({"error":str(e)}), 500
+
+@api_blueprint.route("/poll/update/<int:id>", methods=["PUT"])
+@jwt_required()
+def update_poll(id):
+    user_id = get_jwt_identity()
+    auth = check_user(user_id)
+    if not auth:
+        return jsonify({"error": "User not found"}), 404
+    try:
+        data = request.json
+        poll_schema = PollSchema()
+        validated_data = poll_schema.load(data)
+    except ValidationError as e:
+        return jsonify({"error": e.messages}), 400
+    try:
+        poll = Poll.query.get(id)
+        if not poll:
+            return jsonify({"error": "Poll not found"}), 404
+        for key,value in validated_data.items():
+            if hasattr(poll,key):
+                setattr(poll,key,value)
+        db.session.commit()
+        return jsonify({"id":poll.id}), 200
+    except Exception as e:
+        return jsonify({"error":str(e)}), 500
+
+@api_blueprint.route("/poll/delete/<int:id>", methods=["DELETE"])
+@jwt_required()
+def delete_poll(id):
+    user_id = get_jwt_identity()
+    auth = check_user(user_id)
+    if not auth:
+        return jsonify({"error": "User not found"}), 404
+    try:
+        poll = Poll.query.get(id)
+        if not poll:
+            return jsonify({"error": "Poll not found"}), 404
+        if poll.status == "draft" or poll.status == "completed":
+            db.session.delete(poll)
+            db.session.commit()
+            return jsonify({"message":f"Poll {id} deleted"}), 200
+        return jsonify({"error": "Only unpublished or completed polls can be deleted"}), 400
     except Exception as e:
         return jsonify({"error":str(e)}), 500
