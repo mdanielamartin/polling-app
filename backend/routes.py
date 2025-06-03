@@ -1,9 +1,9 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
 import bcrypt
-from .models import db, User, Poll
+from .models import db, User, Poll, Choice
 from marshmallow import ValidationError
-from .validation import UserSchema, PollSchema
+from .validation import UserSchema, PollSchema, ChoiceSchema
 from .utils import check_user
 from datetime import timedelta
 
@@ -124,5 +124,100 @@ def delete_poll(id):
             db.session.commit()
             return jsonify({"message":f"Poll {id} deleted"}), 200
         return jsonify({"error": "Only unpublished or completed polls can be deleted"}), 400
+    except Exception as e:
+        return jsonify({"error":str(e)}), 500
+
+@api_blueprint.route("/poll/<int:id>/add/choice", methods=["POST"])
+@jwt_required()
+def add_choice(id):
+    user_id = get_jwt_identity()
+    auth = check_user(user_id)
+    if not auth:
+        return jsonify({"error": "User not found"}), 404
+    try:
+        data = request.json
+        choice_schema = ChoiceSchema()
+        choice_data = choice_schema.load(data)
+    except ValidationError as e:
+        return jsonify({"error": e.messages}), 400
+    try:
+        poll = Poll.query.filter_by(id=id, user_id=user_id).first()
+        if not poll:
+            return jsonify({"error": "Poll not found"}), 404
+        if poll.status == "draft":
+            choice = Choice(poll_id = id, name=choice_data["name"], description = choice_data["description"])
+            db.session.add(choice)
+            db.session.commit()
+            return jsonify(choice.serialize()), 200
+        return jsonify({"error": "Only polls with draft status can be modified"}), 400
+    except Exception as e:
+        return jsonify({"error":str(e)}), 500
+
+@api_blueprint.route("/poll/<int:id>/update/choice", methods=["PUT"])
+@jwt_required()
+def update_choice(id):
+    user_id = get_jwt_identity()
+    auth = check_user(user_id)
+    if not auth:
+        return jsonify({"error": "User not found"}), 404
+    try:
+        data = request.json
+        choice_id = data.get("id")
+        choice_schema = ChoiceSchema()
+        choice_data = choice_schema.load(data)
+    except ValidationError as e:
+        return jsonify({"error": e.messages}), 400
+    try:
+        poll = Poll.query.filter_by(id=id, user_id=user_id).first()
+        if not poll:
+            return jsonify({"error": "Poll not found"}), 404
+        if poll.status == "draft" and choice_id:
+            choice = Choice.query.get(choice_id)
+            if not choice:
+                 return jsonify({"error": "Choice not found"}), 404
+
+            for key,value in choice_data.items():
+                if hasattr(choice,key):
+                    setattr(choice,key,value)
+            db.session.commit()
+            return jsonify(choice.serialize()), 200
+        return jsonify({"error": "Only polls with draft status can be modified"}), 400
+    except Exception as e:
+        return jsonify({"error":str(e)}), 500
+
+@api_blueprint.route("/poll/<int:id>/delete/choice/<int:choice_id>", methods=["DELETE"])
+@jwt_required()
+def delete_choice(id, choice_id):
+    user_id = get_jwt_identity()
+    auth = check_user(user_id)
+    if not auth:
+        return jsonify({"error": "User not found"}), 404
+    try:
+        poll = Poll.query.filter_by(id=id, user_id=user_id).first()
+        if not poll:
+            return jsonify({"error": "Poll not found"}), 404
+        if poll.status == "draft" and choice_id:
+            choice = Choice.query.get(choice_id)
+            if not choice:
+                 return jsonify({"error": "Choice not found"}), 404
+            db.session.delete(choice)
+            db.session.commit()
+            return jsonify({"message":f"Choice {choice.id} deleted in poll {id}"}), 200
+        return jsonify({"error": "Only polls with draft status can be modified"}), 400
+    except Exception as e:
+        return jsonify({"error":str(e)}), 500
+
+@api_blueprint.route("/poll/<int:id>", methods=["GET"])
+@jwt_required()
+def get_poll(id):
+    user_id = get_jwt_identity()
+    auth = check_user(user_id)
+    if not auth:
+        return jsonify({"error": "User not found"}), 404
+    try:
+        poll = Poll.query.filter_by(user_id=user_id, id=id).first()
+        poll_data = poll.serialize()
+        poll_data["choices"] = [choice.serialize() for choice in poll.choices]
+        return jsonify(poll_data), 200
     except Exception as e:
         return jsonify({"error":str(e)}), 500

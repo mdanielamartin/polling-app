@@ -11,3 +11,8 @@ class PollSchema(Schema):
     name = fields.Str(required=True, validate=Length(min=3, max=50))
     description = fields.Str(required=False, validate=Length(min=1,max=255))
     time_limit_days = fields.Int(required=True, validate=Range(min=1,max=30))
+
+class ChoiceSchema(Schema):
+    id = fields.Integer(required=False)
+    name = fields.Str(required=True, validate=Length(min=1,max=50))
+    description = fields.Str(required=False, validate=Length(min=1,max=500))

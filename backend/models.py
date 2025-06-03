@@ -73,7 +73,7 @@ class Pollee(db.Model):
 class Passkey(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     poll_id = db.Column(db.Integer, db.ForeignKey('poll.id'), nullable=False)
-    pollee_id = db.Column(db.Integer, db.ForeignKey('poll.id'), nullable=False)
+    pollee_id = db.Column(db.Integer, db.ForeignKey('pollee.id'), nullable=False)
     passkey = db.Column(db.String(10), nullable=False, unique=True)
 
     poll = db.relationship("Poll", back_populates="passkeys")
