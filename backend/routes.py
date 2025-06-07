@@ -1,10 +1,10 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
 import bcrypt
-from .models import db, User, Poll, Choice
+from .models import db, User, Poll, Choice, Pollee, PollAssignment
 from marshmallow import ValidationError
-from .validation import UserSchema, PollSchema, ChoiceSchema
-from .utils import check_user
+from .validation import UserSchema, PollSchema, ChoiceSchema, PolleeSchema, PollAssignmentSchema
+from .utils import check_user, generate_url
 from datetime import timedelta
 
 api_blueprint = Blueprint("server", __name__)
@@ -219,5 +219,85 @@ def get_poll(id):
         poll_data = poll.serialize()
         poll_data["choices"] = [choice.serialize() for choice in poll.choices]
         return jsonify(poll_data), 200
+    except Exception as e:
+        return jsonify({"error":str(e)}), 500
+
+
+@api_blueprint.route("/pollee/add", methods=["POST"])
+@jwt_required()
+def add_pollee():
+    user_id = get_jwt_identity()
+    auth = check_user(user_id)
+    if not auth:
+        return jsonify({"error": "User not found"}), 404
+    try:
+        data = request.json
+        pollee_schema = PolleeSchema()
+        validated_data = pollee_schema.load(data)
+        category_id = data.get("category_id")
+    except ValidationError as e:
+        return jsonify({"error": e.messages}), 400
+    try:
+        pollee = Pollee(user_id=user_id,category_id = category_id, email = validated_data["email"])
+        db.session.add(pollee)
+        db.session.commit()
+        return jsonify(pollee.serialize()), 200
+    except Exception as e:
+        return jsonify({"error":str(e)}), 500
+
+@api_blueprint.route("/pollees", methods=["GET"])
+@jwt_required()
+def get_pollees():
+    user_id = get_jwt_identity()
+    auth = check_user(user_id)
+    if not auth:
+        return jsonify({"error": "User not found"}), 404
+    try:
+        pollees = Pollee.query.filter_by(user_id=user_id).all()
+        pollees_list = [pollee.serialize() for pollee in pollees]
+        return jsonify(pollees_list), 200
+    except Exception as e:
+        return jsonify({"error":str(e)}), 500
+
+@api_blueprint.route("/pollee/assignment", methods=["POST"])
+@jwt_required()
+def assign_pollee():
+    user_id = get_jwt_identity()
+    auth = check_user(user_id)
+    if not auth:
+        return jsonify({"error": "User not found"}), 404
+    try:
+        data = request.json
+        assign_schema = PollAssignmentSchema()
+        validated_data = assign_schema.load(data)
+    except ValidationError as e:
+        return jsonify({"error": e.messages}), 400
+    try:
+        poll = Poll.query.get(validated_data["poll_id"])
+        if str(poll.user_id) != user_id:
+            return jsonify({"error": "Bad Request"}), 400
+        assignment = PollAssignment(**validated_data)
+        db.session.add(assignment)
+        db.session.commit()
+        return jsonify(f"Pollee {validated_data["pollee_id"]} has been assigned to poll {poll.id}"), 200
+    except Exception as e:
+        return jsonify({"error":str(e)}), 500
+
+@api_blueprint.route("/poll/activate/<int:id>", methods=["PUT"])
+@jwt_required()
+def activate_poll(id):
+    user_id = get_jwt_identity()
+    auth = check_user(user_id)
+    if not auth:
+        return jsonify({"error": "User not found"}), 404
+    try:
+        poll = Poll.query.filter_by(id=id, user_id=user_id).first()
+        if not poll:
+            return jsonify({"error": "Poll not found"}), 404
+        poll.status = "active"
+        assignments = PollAssignment.query.filter_by(poll_id=id).all()
+        tokens = [generate_url(pollee.id,pollee.pollee.email,id,poll.time_limit_days) for pollee in assignments]
+        db.session.commit()
+        return jsonify({"id":tokens}), 200
     except Exception as e:
         return jsonify({"error":str(e)}), 500

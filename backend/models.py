@@ -10,7 +10,8 @@ class User(db.Model):
     email = db.Column(db.String(50), nullable=False)
     password = db.Column(db.String(256), nullable=False)
 
-    polls = db.relationship("Poll",back_populates = "user")
+    polls = db.relationship("Poll",back_populates = "user",  cascade="all, delete-orphan")
+    pollees = db.relationship("Pollee", back_populates="user",  cascade="all, delete-orphan")
 
 def get_utc_time():
     return datetime.now(timezone.utc)
@@ -27,7 +28,7 @@ class Poll(db.Model):
 
     user = db.relationship("User",back_populates = "polls")
     choices = db.relationship("Choice", back_populates="poll", cascade="all, delete-orphan")
-    passkeys = db.relationship("Passkey", back_populates="poll", cascade="all, delete-orphan")
+    assignments = db.relationship("PollAssignment", back_populates="poll", cascade="all, delete-orphan")
     votes = db.relationship("Vote", back_populates="poll", cascade="all, delete-orphan")
 
     def is_expired(self):
@@ -68,15 +69,36 @@ class Choice(db.Model):
 class Pollee(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(50), nullable=False)
+    category_id = db.Column(db.Integer, db.ForeignKey("category.id"), nullable=True)
+    user_id= db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+
+    user = db.relationship("User", back_populates="pollees")
+    category = db.relationship("Category", back_populates="pollees")
+    assignments = db.relationship("PollAssignment", back_populates="pollee")
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "email": self.email,
+            "category": self.category_id,
+        }
+class Category(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), nullable=False)
+
+    pollees = db.relationship("Pollee", back_populates="category")
 
 
-class Passkey(db.Model):
+class PollAssignment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     poll_id = db.Column(db.Integer, db.ForeignKey('poll.id'), nullable=False)
     pollee_id = db.Column(db.Integer, db.ForeignKey('pollee.id'), nullable=False)
-    passkey = db.Column(db.String(10), nullable=False, unique=True)
 
-    poll = db.relationship("Poll", back_populates="passkeys")
+    poll = db.relationship("Poll", back_populates="assignments")
+    pollee = db.relationship("Pollee", back_populates = "assignments")
+
+    __table_args__ = (db.UniqueConstraint('poll_id', 'pollee_id', name='unique_assignment'),)
+
 
 class Vote(db.Model):
     id = db.Column(db.Integer, primary_key=True)

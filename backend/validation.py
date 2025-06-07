@@ -16,3 +16,12 @@ class ChoiceSchema(Schema):
     id = fields.Integer(required=False)
     name = fields.Str(required=True, validate=Length(min=1,max=50))
     description = fields.Str(required=False, validate=Length(min=1,max=500))
+
+class PolleeSchema(Schema):
+    id = fields.Integer(required=False)
+    email =  fields.Email(required=True, validate=Length(min=5, max=50))
+    category_id = fields.Integer(required=False)
+
+class PollAssignmentSchema(Schema):
+    poll_id = fields.Integer(required=True)
+    pollee_id = fields.Integer(required=True)
