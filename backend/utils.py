@@ -11,4 +11,4 @@ def check_user(id):
 
 def generate_url(pollee_id,email,poll_id,valid_days):
    access_token = create_access_token(identity=str(poll_id),additional_claims={"pollee_id": pollee_id}, expires_delta=timedelta(days=valid_days))
-   return access_token + email
+   return access_token

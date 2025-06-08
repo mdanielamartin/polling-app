@@ -1,9 +1,10 @@
 from flask import Blueprint, jsonify, request
-from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
+from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity, get_jwt, verify_jwt_in_request
+from jwt.exceptions import ExpiredSignatureError
 import bcrypt
-from .models import db, User, Poll, Choice, Pollee, PollAssignment
+from .models import db, User, Poll, Choice, Pollee, PollAssignment, Vote
 from marshmallow import ValidationError
-from .validation import UserSchema, PollSchema, ChoiceSchema, PolleeSchema, PollAssignmentSchema
+from .validation import UserSchema, PollSchema, ChoiceSchema, PolleeSchema, PollAssignmentSchema, VoteSchema
 from .utils import check_user, generate_url
 from datetime import timedelta
 
@@ -259,27 +260,32 @@ def get_pollees():
     except Exception as e:
         return jsonify({"error":str(e)}), 500
 
-@api_blueprint.route("/pollee/assignment", methods=["POST"])
+@api_blueprint.route("/pollee/assignment/<int:poll_id>", methods=["POST"])
 @jwt_required()
-def assign_pollee():
+def assign_pollee(poll_id):
     user_id = get_jwt_identity()
     auth = check_user(user_id)
     if not auth:
         return jsonify({"error": "User not found"}), 404
     try:
         data = request.json
-        assign_schema = PollAssignmentSchema()
+        if not isinstance(data, list):  # Ensure it's a list
+            return jsonify({"error": "Invalid data format"}), 400
+        assign_schema = PollAssignmentSchema(many=True)
         validated_data = assign_schema.load(data)
     except ValidationError as e:
         return jsonify({"error": e.messages}), 400
     try:
-        poll = Poll.query.get(validated_data["poll_id"])
-        if str(poll.user_id) != user_id:
-            return jsonify({"error": "Bad Request"}), 400
-        assignment = PollAssignment(**validated_data)
-        db.session.add(assignment)
-        db.session.commit()
-        return jsonify(f"Pollee {validated_data["pollee_id"]} has been assigned to poll {poll.id}"), 200
+        poll = Poll.query.get(poll_id)
+        if not poll or str(poll.user_id) != user_id:
+            return jsonify({"error": "Unauthorized access"}), 401
+        result = []
+        for assignment in validated_data:
+            poll_assign = PollAssignment(poll_id=poll_id,pollee_id=assignment["pollee_id"])
+            db.session.add(poll_assign)
+            db.session.commit()
+            result.append(poll_assign.serialize())
+        return jsonify(result), 200
     except Exception as e:
         return jsonify({"error":str(e)}), 500
 
@@ -296,8 +302,60 @@ def activate_poll(id):
             return jsonify({"error": "Poll not found"}), 404
         poll.status = "active"
         assignments = PollAssignment.query.filter_by(poll_id=id).all()
-        tokens = [generate_url(pollee.id,pollee.pollee.email,id,poll.time_limit_days) for pollee in assignments]
+        tokens = [generate_url(pollee.pollee_id,pollee.pollee.email,id,poll.time_limit_days) for pollee in assignments]
         db.session.commit()
-        return jsonify({"id":tokens}), 200
+        return jsonify(tokens), 200
+    except Exception as e:
+        return jsonify({"error":str(e)}), 500
+
+@api_blueprint.route("/pollee/vote", methods=["POST"])
+@jwt_required()
+def vote_pollee():
+    poll_id = get_jwt_identity()
+    claims = get_jwt()
+    pollee_id = claims.get('pollee_id')
+    try:
+        data = request.json
+        vote_schema = VoteSchema()
+        validated_data = vote_schema.load(data)
+    except ValidationError as e:
+        return jsonify({"error": e.messages}), 400
+    try:
+        assignment = PollAssignment.query.filter_by(poll_id=poll_id,pollee_id=pollee_id).first()
+        if not assignment:
+            return jsonify({"error": "You do not have permission to vote"}), 409
+        poll = Poll.query.get(poll_id)
+        if poll.status != 'active':
+            return jsonify({"error": "This poll has closed"}), 400
+        choice = Choice.query.filter_by(poll_id=poll_id,id=validated_data["choice_id"]).first()
+        if choice:
+            vote = Vote(pollee_id = pollee_id,poll_id=poll_id, choice_id=validated_data["choice_id"])
+            db.session.add(vote)
+            db.session.commit()
+            return jsonify(f"Vote has been casted successfully"), 200
+        return jsonify({"error": "Invalid choice and poll combination"}), 400
+    except Exception as e:
+        return jsonify({"error":str(e)}), 500
+
+@api_blueprint.route("/poll/vote", methods=["GET"])
+@jwt_required()
+def vote_poll():
+    poll_id = get_jwt_identity()
+    claims = get_jwt()
+    pollee_id = claims.get('pollee_id', None)
+    if not poll_id or not pollee_id:
+        return jsonify({"error": "Invalid token"}), 401
+    try:
+        verify_jwt_in_request()
+    except ExpiredSignatureError:
+        return jsonify({"error": "This poll has closed"}), 401
+    try:
+        assignment = PollAssignment.query.filter_by(poll_id=poll_id,pollee_id=pollee_id).first()
+        if not assignment:
+            return jsonify({"error": "You do not have permission to vote"}), 409
+        poll = Poll.query.get(poll_id)
+        if poll.status != 'active':
+            return jsonify({"error": "This poll has closed"}), 400
+        return jsonify(poll.pollee_view()), 200
     except Exception as e:
         return jsonify({"error":str(e)}), 500
