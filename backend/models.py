@@ -49,6 +49,11 @@ class Poll(db.Model):
             "publish_date": self.publish_date,
             "time_limit_days": self.time_limit_days
         }
+    def pollee_view(self):
+        return {
+            "name": self.name,
+            "id": self.id,
+            "choices":[choice.serialize() for choice in self.choices]}
 
 class Choice(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -88,6 +93,12 @@ class Category(db.Model):
 
     pollees = db.relationship("Pollee", back_populates="category")
 
+    def serialize(self):
+        return {
+            "id": self.id,
+            "name": self.email,
+            "pollees": [pollee.serialize() for pollee in self.pollees]
+        }
 
 class PollAssignment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -99,7 +110,12 @@ class PollAssignment(db.Model):
 
     __table_args__ = (db.UniqueConstraint('poll_id', 'pollee_id', name='unique_assignment'),)
 
-
+    def serialize(self):
+        return {
+            "id": self.id,
+            "poll_id": self.poll_id,
+            "pollee_id": self.pollee_id
+        }
 class Vote(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     pollee_id = db.Column(db.Integer, db.ForeignKey("pollee.id"), nullable=False)
@@ -108,3 +124,11 @@ class Vote(db.Model):
     unique_constraint = db.UniqueConstraint('pollee_id', 'poll_id', name='one_vote')
 
     poll = db.relationship("Poll", back_populates="votes")
+
+    def serialize(self):
+        return {
+            "id": self.id,
+            "pollee_id": self.pollee_id,
+            "poll_id": self.poll_id,
+            "choice_id": self.choice_id
+            }

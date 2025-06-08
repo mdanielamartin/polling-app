@@ -23,5 +23,7 @@ class PolleeSchema(Schema):
     category_id = fields.Integer(required=False)
 
 class PollAssignmentSchema(Schema):
-    poll_id = fields.Integer(required=True)
     pollee_id = fields.Integer(required=True)
+
+class VoteSchema(Schema):
+    choice_id = fields.Integer(required=True)
