@@ -24,19 +24,13 @@ class Poll(db.Model):
     created_at = db.Column(db.DateTime, nullable=False, default=get_utc_time())
     status = db.Column(db.String(20), nullable=False, default="draft")
     publish_date=db.Column(db.DateTime, nullable=True)
+    closing_date = db.Column(db.DateTime, nullable=True)
     time_limit_days = db.Column(db.Integer, default=30)
 
     user = db.relationship("User",back_populates = "polls")
     choices = db.relationship("Choice", back_populates="poll", cascade="all, delete-orphan")
     assignments = db.relationship("PollAssignment", back_populates="poll", cascade="all, delete-orphan")
     votes = db.relationship("Vote", back_populates="poll", cascade="all, delete-orphan")
-
-    def is_expired(self):
-        if self.status == 'published' and timezone.utc > self.publish_date + timedelta(days=self.time_limit_days):
-            self.status = 'completed'
-            db.session.commit()
-            return True
-        return False
 
 
     def serialize(self):

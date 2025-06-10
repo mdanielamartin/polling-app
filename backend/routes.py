@@ -5,8 +5,8 @@ import bcrypt
 from .models import db, User, Poll, Choice, Pollee, PollAssignment, Vote
 from marshmallow import ValidationError
 from .validation import UserSchema, PollSchema, ChoiceSchema, PolleeSchema, PollAssignmentSchema, VoteSchema
-from .utils import check_user, generate_url
-from datetime import timedelta
+from .utils import check_user, generate_url, send_token_email
+from datetime import timedelta, timezone, datetime
 
 api_blueprint = Blueprint("server", __name__)
 
@@ -300,11 +300,25 @@ def activate_poll(id):
         poll = Poll.query.filter_by(id=id, user_id=user_id).first()
         if not poll:
             return jsonify({"error": "Poll not found"}), 404
+        if poll.status == 'active':
+            return jsonify({"error": "This poll is already active"}), 400
+        activation_date = datetime.now(timezone.utc)
+        closing_date = (activation_date + timedelta(days=poll.time_limit_days)).replace(hour=23, minute=59, second=59)
+
         poll.status = "active"
+        poll.publish_date = activation_date
+        poll.closing_date = closing_date
         assignments = PollAssignment.query.filter_by(poll_id=id).all()
-        tokens = [generate_url(pollee.pollee_id,pollee.pollee.email,id,poll.time_limit_days) for pollee in assignments]
+        fails = []
+        for pollee in assignments:
+            token = generate_url(pollee.pollee_id,id,poll.closing_date)
+            send_result = send_token_email(pollee.pollee.email,token, poll.closing_date,poll.name, pollee.pollee_id)
+            if send_result["pollee_id"]:
+                fails.append(send_result["pollee_id"])
         db.session.commit()
-        return jsonify(tokens), 200
+        if fails:
+            return {"error":fails}, 400
+        return jsonify({"message":"All emails sent successfully"}), 200
     except Exception as e:
         return jsonify({"error":str(e)}), 500
 
