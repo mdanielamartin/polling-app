@@ -20,10 +20,14 @@ class ChoiceSchema(Schema):
 class PolleeSchema(Schema):
     id = fields.Integer(required=False)
     email =  fields.Email(required=True, validate=Length(min=5, max=50))
-    category_id = fields.Integer(required=False)
+    list_id = fields.Integer(required=False)
 
 class PollAssignmentSchema(Schema):
     pollee_id = fields.Integer(required=True)
 
 class VoteSchema(Schema):
     choice_id = fields.Integer(required=True)
+
+class ListSchema(Schema):
+    id = fields.Integer(required=False)
+    name = fields.Str(required=True, validate=Length(min=1,max=25))
