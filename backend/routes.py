@@ -2,11 +2,12 @@ from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity, get_jwt, verify_jwt_in_request
 from jwt.exceptions import ExpiredSignatureError
 import bcrypt
-from .models import db, User, Poll, Choice, Pollee, PollAssignment, Vote
+from .models import db, User, Poll, Choice, Pollee, PollAssignment, Vote, List
 from marshmallow import ValidationError
-from .validation import UserSchema, PollSchema, ChoiceSchema, PolleeSchema, PollAssignmentSchema, VoteSchema
+from .validation import UserSchema, PollSchema, ChoiceSchema, PolleeSchema, PollAssignmentSchema, VoteSchema, ListSchema
 from .utils import check_user, generate_url, send_token_email
 from datetime import timedelta, timezone, datetime
+from sqlalchemy import func
 
 api_blueprint = Blueprint("server", __name__)
 
@@ -70,6 +71,7 @@ def create_poll():
     except Exception as e:
         return jsonify({"error":str(e)}), 500
 
+
 @api_blueprint.route("/polls", methods=["GET"])
 @jwt_required()
 def get_polls():
@@ -98,7 +100,7 @@ def update_poll(id):
     except ValidationError as e:
         return jsonify({"error": e.messages}), 400
     try:
-        poll = Poll.query.get(id)
+        poll = Poll.query.filter_by(id=id,user_id=user_id).first()
         if not poll:
             return jsonify({"error": "Poll not found"}), 404
         for key,value in validated_data.items():
@@ -117,7 +119,7 @@ def delete_poll(id):
     if not auth:
         return jsonify({"error": "User not found"}), 404
     try:
-        poll = Poll.query.get(id)
+        poll = Poll.query.filter_by(id=id,user_id=user_id).first()
         if not poll:
             return jsonify({"error": "Poll not found"}), 404
         if poll.status == "draft" or poll.status == "completed":
@@ -198,7 +200,7 @@ def delete_choice(id, choice_id):
         if not poll:
             return jsonify({"error": "Poll not found"}), 404
         if poll.status == "draft" and choice_id:
-            choice = Choice.query.get(choice_id)
+            choice = Choice.query.filter_by(id=choice_id, poll_id=id).first()
             if not choice:
                  return jsonify({"error": "Choice not found"}), 404
             db.session.delete(choice)
@@ -217,6 +219,8 @@ def get_poll(id):
         return jsonify({"error": "User not found"}), 404
     try:
         poll = Poll.query.filter_by(user_id=user_id, id=id).first()
+        if not poll:
+            return jsonify({"error": "Poll not found"}), 404
         poll_data = poll.serialize()
         poll_data["choices"] = [choice.serialize() for choice in poll.choices]
         return jsonify(poll_data), 200
@@ -235,14 +239,65 @@ def add_pollee():
         data = request.json
         pollee_schema = PolleeSchema()
         validated_data = pollee_schema.load(data)
-        category_id = data.get("category_id")
+        list_id = data.get("list_id", None)
     except ValidationError as e:
         return jsonify({"error": e.messages}), 400
     try:
-        pollee = Pollee(user_id=user_id,category_id = category_id, email = validated_data["email"])
+        pollee = Pollee(user_id=user_id,list_id = list_id, email = validated_data["email"])
         db.session.add(pollee)
         db.session.commit()
         return jsonify(pollee.serialize()), 200
+    except Exception as e:
+        return jsonify({"error":str(e)}), 500
+
+@api_blueprint.route("/pollee/delete", methods=["DELETE"])
+@jwt_required()
+def delete_pollee():
+    user_id = get_jwt_identity()
+    auth = check_user(user_id)
+    if not auth:
+        return jsonify({"error": "User not found"}), 404
+    try:
+        data = request.json
+        if isinstance(data, list):
+            for elem in data:
+                if not isinstance(elem["pollee_id"],int):
+                    return jsonify({"error": "Invalid data format"}), 400
+        else:
+            return jsonify({"error": "Invalid data format"}), 400
+
+        for elem in data:
+            pollee = Pollee.query.filter_by(id=elem["pollee_id"],user_id=user_id).first()
+            if not pollee:
+                return jsonify({"error": "Pollee not found"}), 404
+            db.session.delete(pollee)
+        db.session.commit()
+        return jsonify({"message":"Pollees have been deleted successfully"}), 200
+    except Exception as e:
+        return jsonify({"error":str(e)}), 500
+
+@api_blueprint.route("/pollee/update", methods=["PUT"])
+@jwt_required()
+def update_pollee():
+    user_id = get_jwt_identity()
+    auth = check_user(user_id)
+    if not auth:
+        return jsonify({"error": "User not found"}), 404
+    try:
+        data = request.json
+        poll_schema = PolleeSchema()
+        validated_data = poll_schema.load(data)
+    except ValidationError as e:
+        return jsonify({"error": e.messages}), 400
+    try:
+        pollee = Pollee.query.filter_by(id=validated_data["id"],user_id=user_id).first()
+        if not pollee:
+            return jsonify({"error": "Pollee not found"}), 404
+        for key,value in validated_data.items():
+            if hasattr(pollee,key):
+                setattr(pollee,key,value)
+        db.session.commit()
+        return jsonify({"id":pollee.id}), 200
     except Exception as e:
         return jsonify({"error":str(e)}), 500
 
@@ -289,6 +344,49 @@ def assign_pollee(poll_id):
     except Exception as e:
         return jsonify({"error":str(e)}), 500
 
+@api_blueprint.route("/pollee/assignment/<int:poll_id>", methods=["DELETE"])
+@jwt_required()
+def assign_delete(poll_id):
+    user_id = get_jwt_identity()
+    auth = check_user(user_id)
+    if not auth:
+        return jsonify({"error": "User not found"}), 404
+    try:
+        data = request.json
+        if not isinstance(data, list):  # Ensure it's a list
+            return jsonify({"error": "Invalid data format"}), 400
+    except ValidationError as e:
+        return jsonify({"error": e.messages}), 400
+    try:
+        poll = Poll.query.filter_by(id=poll_id).first()
+        if not poll or str(poll.user_id) != user_id or poll.status=="active":
+            return jsonify({"error": "Unauthorized access"}), 401
+        for element in data:
+            if not isinstance(element["id"],int):
+                return jsonify({"error": "Invalid data format"}), 400
+            assignment = PollAssignment.query.filter_by(id=element["id"],poll_id=poll_id).first()
+            if not assignment:
+                continue
+            db.session.delete(assignment)
+        db.session.commit()
+        return jsonify({"message":"Assignments deleted successfully"}), 200
+    except Exception as e:
+        return jsonify({"error":str(e)}), 500
+
+@api_blueprint.route("/pollee/assignment/<int:poll_id>", methods=["GET"])
+@jwt_required()
+def get_assignments(poll_id):
+    user_id = get_jwt_identity()
+    auth = check_user(user_id)
+    if not auth:
+        return jsonify({"error": "User not found"}), 404
+    try:
+        assignments = PollAssignment.query.filter_by(poll_id=poll_id).all()
+        assignment_list = [assignment.serialize() for assignment in assignments]
+        return jsonify(assignment_list), 200
+    except Exception as e:
+        return jsonify({"error":str(e)}), 500
+
 @api_blueprint.route("/poll/activate/<int:id>", methods=["PUT"])
 @jwt_required()
 def activate_poll(id):
@@ -302,13 +400,16 @@ def activate_poll(id):
             return jsonify({"error": "Poll not found"}), 404
         if poll.status == 'active':
             return jsonify({"error": "This poll is already active"}), 400
-        activation_date = datetime.now(timezone.utc)
-        closing_date = (activation_date + timedelta(days=poll.time_limit_days)).replace(hour=23, minute=59, second=59)
+        activation_date = datetime.now()
+        closing_date = (activation_date + timedelta(days=poll.time_limit_days))
+        closing_date = datetime(closing_date.year, closing_date.month, closing_date.day, 23, 59, 59)
 
         poll.status = "active"
         poll.publish_date = activation_date
         poll.closing_date = closing_date
         assignments = PollAssignment.query.filter_by(poll_id=id).all()
+        if not assignments:
+            return jsonify({"error": "Poll has not been assigned to a contact"}), 400
         fails = []
         for pollee in assignments:
             token = generate_url(pollee.pollee_id,id,poll.closing_date)
@@ -371,5 +472,98 @@ def vote_poll():
         if poll.status != 'active':
             return jsonify({"error": "This poll has closed"}), 400
         return jsonify(poll.pollee_view()), 200
+    except Exception as e:
+        return jsonify({"error":str(e)}), 500
+
+
+@api_blueprint.route("/poll/results/<int:id>", methods=["GET"])
+@jwt_required()
+def get_poll_results(id):
+    user_id = get_jwt_identity()
+    auth = check_user(user_id)
+    if not auth:
+        return jsonify({"error": "User not found"}), 404
+    try:
+        votes = db.session.query(Vote.choice_id, Choice.name, Choice.description, func.count(Vote.id)).join(Choice, Vote.choice_id == Choice.id).filter(Vote.poll_id == id).group_by(Vote.choice_id, Choice.name, Choice.description).all()
+        result = [{"choice_id":choice_id, "name":name, "description":description, "count":count} for choice_id,name,description,count in votes]
+        return jsonify(result), 200
+    except Exception as e:
+        return jsonify({"error":str(e)}), 500
+
+@api_blueprint.route("/list/create", methods=["POST"])
+@jwt_required()
+def create_list():
+    user_id = get_jwt_identity()
+    auth = check_user(user_id)
+    if not auth:
+        return jsonify({"error": "User not found"}), 404
+    try:
+        data = request.json
+        list_schema = ListSchema()
+        list_data = list_schema.load(data)
+    except ValidationError as e:
+        return jsonify({"error": e.messages}), 400
+    try:
+        list_obj = List(name=list_data["name"], user_id=user_id)
+        db.session.add(list_obj)
+        db.session.commit()
+        return jsonify(list_obj.serialize()),200
+    except Exception as e:
+        return jsonify({"error":str(e)}), 500
+
+@api_blueprint.route("/list/update", methods=["PUT"])
+@jwt_required()
+def update_list():
+    user_id = get_jwt_identity()
+    auth = check_user(user_id)
+    if not auth:
+        return jsonify({"error": "User not found"}), 404
+    try:
+        data = request.json
+        list_schema = ListSchema()
+        list_data = list_schema.load(data)
+        id = list_data["id"]
+    except ValidationError as e:
+        return jsonify({"error": e.messages}), 400
+    try:
+        if not id:
+            return jsonify({"error": "List not found"}), 404
+        list_obj = List.query.filter_by(id=list_data["id"], user_id=user_id).first()
+        if not list_obj:
+            return jsonify({"error": "List not found"}), 404
+        list_obj.name = list_data["name"]
+        db.session.commit()
+        return jsonify(list_obj.serialize()), 200
+    except Exception as e:
+        return jsonify({"error":str(e)}), 500
+
+@api_blueprint.route("/list/delete/<int:id>", methods=["DELETE"])
+@jwt_required()
+def delete_list(id):
+    user_id = get_jwt_identity()
+    auth = check_user(user_id)
+    if not auth:
+        return jsonify({"error": "User not found"}), 404
+    try:
+        list_obj = List.query.filter_by(id=id, user_id=user_id).first()
+        if not list_obj:
+            return jsonify({"error": "List not found"}), 404
+        db.session.delete(list_obj)
+        db.session.commit()
+        return jsonify({"message":f"List has been deleted"}), 200
+    except Exception as e:
+        return jsonify({"error":str(e)}), 500
+
+@api_blueprint.route("/lists", methods=["GET"])
+@jwt_required()
+def get_lists():
+    user_id = get_jwt_identity()
+    auth = check_user(user_id)
+    if not auth:
+        return jsonify({"error": "User not found"}), 404
+    try:
+        list_obj = List.query.filter_by(user_id=user_id).all()
+        list_data = [elem.serialize() for elem in list_obj]
+        return jsonify(list_data), 200
     except Exception as e:
         return jsonify({"error":str(e)}), 500

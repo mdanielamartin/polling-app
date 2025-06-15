@@ -12,7 +12,7 @@ class User(db.Model):
 
     polls = db.relationship("Poll",back_populates = "user",  cascade="all, delete-orphan")
     pollees = db.relationship("Pollee", back_populates="user",  cascade="all, delete-orphan")
-
+    lists = db.relationship("List", back_populates="user",  cascade="all, delete-orphan")
 def get_utc_time():
     return datetime.now(timezone.utc)
 
@@ -41,6 +41,7 @@ class Poll(db.Model):
             "created_at": self.created_at,
             "status": self.status,
             "publish_date": self.publish_date,
+            "closing_date": self.closing_date,
             "time_limit_days": self.time_limit_days
         }
     def pollee_view(self):
@@ -48,6 +49,10 @@ class Poll(db.Model):
             "name": self.name,
             "id": self.id,
             "choices":[choice.serialize() for choice in self.choices]}
+    def get_results(self):
+        return {
+            "votes": [vote.serialize() for vote in self.votes]
+        }
 
 class Choice(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -56,6 +61,7 @@ class Choice(db.Model):
     description = db.Column(db.String(500), nullable=True)
 
     poll = db.relationship("Poll", back_populates="choices")
+    votes = db.relationship("Vote", back_populates="choices")
 
     def serialize(self):
         return {
@@ -68,29 +74,31 @@ class Choice(db.Model):
 class Pollee(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(50), nullable=False)
-    category_id = db.Column(db.Integer, db.ForeignKey("category.id"), nullable=True)
+    list_id = db.Column(db.Integer, db.ForeignKey("list.id"), nullable=True)
     user_id= db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     user = db.relationship("User", back_populates="pollees")
-    category = db.relationship("Category", back_populates="pollees")
-    assignments = db.relationship("PollAssignment", back_populates="pollee")
+    list = db.relationship("List", back_populates="pollees")
+    assignments = db.relationship("PollAssignment", back_populates="pollee",  cascade="all, delete-orphan")
 
     def serialize(self):
         return {
             "id": self.id,
             "email": self.email,
-            "category": self.category_id,
+            "list": self.list_id,
         }
-class Category(db.Model):
+class List(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    user_id= db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     name = db.Column(db.String(50), nullable=False)
 
-    pollees = db.relationship("Pollee", back_populates="category")
+    pollees = db.relationship("Pollee", back_populates="list",  cascade="all, delete-orphan")
+    user = db.relationship("User",back_populates = "lists")
 
     def serialize(self):
         return {
             "id": self.id,
-            "name": self.email,
+            "name": self.name,
             "pollees": [pollee.serialize() for pollee in self.pollees]
         }
 
@@ -118,11 +126,10 @@ class Vote(db.Model):
     unique_constraint = db.UniqueConstraint('pollee_id', 'poll_id', name='one_vote')
 
     poll = db.relationship("Poll", back_populates="votes")
-
+    choices = db.relationship("Choice", back_populates = "votes")
     def serialize(self):
         return {
             "id": self.id,
-            "pollee_id": self.pollee_id,
             "poll_id": self.poll_id,
             "choice_id": self.choice_id
             }
