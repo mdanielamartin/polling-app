@@ -1,5 +1,5 @@
 const tailwindConfig = {
-  darkMode: "class",
+  darkMode: "",
   theme: {
     extend: {},
   },

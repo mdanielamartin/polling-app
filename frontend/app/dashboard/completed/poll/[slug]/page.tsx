@@ -1,35 +1,57 @@
 "use client"
-import { PieChart } from 'react-minimal-pie-chart';
+import { PieChart } from "@mui/x-charts/PieChart"
+import { Accordion, AccordionContent, AccordionTitle, AccordionPanel, List, ListItem } from 'flowbite-react';
 
-const data = [
-  { title: 'Burger King', value: 4, color: '#0088FE' },
-  { title: 'Pollo Sabroso', value: 3, color: '#00C49F' },
-  { title: 'Migos', value: 2, color: '#FFBB28' },
-  { title: 'La Pastora', value: 1, color: '#FF8042' },
+const results = [
+  { id: 0,label:"Burger King", value: 1, color: '#0088FE' },
+  { id: 1,label:"La Pastora", value: 3, color: '#00C49F' },
+  { id: 2,label:"Pollo Sabroso", value: 2, color: '#FFBB28' },
+  { id: 3,label:"Migos", value: 5, color: '#FF8042' },
 ];
 
+const orderedResults = [...results].sort((a, b) => b.value - a.value)
 const Results = () => (
-    <div className='h-full w-full'>
-        <div className='grid grid-cols-1 h-full w-full grid-rows-2'>
+  <div className='p-4 lg:p-8 min-h-screen flex items-center justify-center'>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-center h-auto">
+      <div className='w-full flex items-start justify-center'>
         <PieChart
-          data={data}
-          label={({ dataEntry }) => `${dataEntry.title}`}
-          labelStyle={{
-    fontSize: '0.75rem', // Tailwind's text-sm
-    fill: '#1f2937',     // Tailwind's text-gray-800
-    fontWeight: 600,     // Tailwind's font-semibold
-  }}
-
-          radius={42}
-          labelPosition={112}
-          className='text-black'
-          animate
+          series={[
+            {
+              data: results,
+            },
+          ]}
+          width={250}
+          height={250}
         />
+      </div>
+      <div className='w-full max-w-lg mx-auto my-4' >
+        <div className='min-w-4/5'>
+          <Accordion className='w-full mx-auto'>
+            <AccordionPanel>
+              <AccordionTitle className='font-bold text-xl'>Results</AccordionTitle>
+              <AccordionContent>
+                <List ordered>
+                  {orderedResults.map((choice, index) => {
+                    return (
+                      <ListItem className='text-lg' key={index}>{choice.label}</ListItem>
+                    )
+                  })}
+                </List>
+              </AccordionContent>
+            </AccordionPanel>
+          </Accordion></div>
 
-        <div className='row-start-2'>hhhhhhhhhhhhhhhh</div>
-        </div>
+
+      </div>
     </div>
-);
+
+
+  </div>
+)
+
+
+
+
 
 
 export default Results

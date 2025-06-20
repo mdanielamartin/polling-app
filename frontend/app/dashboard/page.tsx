@@ -4,11 +4,12 @@ import { FaAddressBook, FaCircleUser, FaSquarePollVertical } from "react-icons/f
 import { MdOutlineAddchart } from "react-icons/md";
 import { FaEdit } from "react-icons/fa";
 import { HiOutlineStatusOnline } from "react-icons/hi";
-
+import PollCreateModal from "../../components/PollCreateModal";
 const Dashboard = () => {
 
     return (
         <div className="flex min-h-screen items-center justify-center m-4">
+            <PollCreateModal/>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 sm:gap-8 w-full max-w-4xl">
                 <div className="bg-green-400 h-40 rounded-lg flex flex-col items-center justify-center hover:bg-green-600 p-3 cursor-pointer">
                     <h1 className="font-bold text-2xl text-center">New Poll</h1>
