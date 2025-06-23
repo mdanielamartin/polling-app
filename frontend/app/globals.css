@@ -1,14 +1,3 @@
 @import "tailwindcss";
 @plugin "flowbite-react/plugin/tailwindcss";
 @source "../.flowbite-react/class-list.json";
-
-.light-mode label {
-  color: #111; /* Dark text in light mode */
-}
-
-.light-mode input {
-  color: #111; /* Dark text in light mode */
-}
-.dark label {
-  color: #fff; /* White text in dark mode */
-}

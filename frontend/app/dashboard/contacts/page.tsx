@@ -1,19 +1,31 @@
+"use client"
 import { Checkbox, Tabs, TabItem, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, Button, ButtonGroup } from "flowbite-react";
-import { HiUserAdd } from "react-icons/hi";
-import { FaTrash, FaClipboardList } from "react-icons/fa";
-import { MdFormatListBulletedAdd } from "react-icons/md";
-const Contacts = () => {
 
+import { FaTrash } from "react-icons/fa";
+import AddContactModal from "../../../components/AddContactModal";
+import AddListModal from "../../../components/AddListModal";
+import ListSelectionModal from "../../../components/ListSelectionModal";
+import ConfirmDeletion from "../../../components/ConfirmDeletion";
+
+const Contacts = () => {
 
     return (
         <div className="flex flex-cols min-h-screen w-full justify-center m-2">
             <Tabs className="min-w-8/10 max-w-9/10" aria-label="Pills" variant="pills">
                 <TabItem active title="All">
                     <div className="flex place-content-between mb-5">
-                        <Button color="light"><HiUserAdd className="mr-2 text-xl" />Add Contact</Button>
-                        <Button color="light"><FaClipboardList className="mr-2 text-xl" />Add Selected to List</Button>
-                        <Button color="light"><MdFormatListBulletedAdd className="mr-2 text-xl" />Create New List</Button>
-                        <Button color="red"><FaTrash className="mr-2 text-xl"/> Delete Selected</Button>
+                        <AddContactModal />
+                        <ListSelectionModal />
+                        <AddListModal />
+                        <   ConfirmDeletion message="Are you sure you want to delete the selected contacts?" title=
+                        {
+                            <span className="flex items-center gap-2">
+                                <FaTrash className="text-sm" />
+                                Delete Selection
+                            </span>}
+                            />
+
+
                     </div>
                     <Table className="w-full shadow-md  rounded-lg">
                         <TableHead className="bg-gray-500">
@@ -45,7 +57,7 @@ const Contacts = () => {
                     </Table>
                 </TabItem>
                 <TabItem title="Work">
-                                       <Table className="w-full shadow-md bg-gray-500 rounded-lg">
+                    <Table className="w-full shadow-md bg-gray-500 rounded-lg">
                         <TableHead className="bg-gray-500">
                             <TableRow className="bg-gray-500">
                                 <TableHeadCell>
@@ -77,6 +89,7 @@ const Contacts = () => {
                     <p className="text-sm text-gray-500 dark:text-gray-400">Friends</p>
                 </TabItem>
             </Tabs>
+
         </div>
     );
 }

@@ -24,7 +24,7 @@ export default function RootLayout({
 
         </head>
       <body
-        className={`${mainFont.variable} antialiased light-mode`}
+        className={`${mainFont.variable} antialiased light`}
       >
         {children}
 
