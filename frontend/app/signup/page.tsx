@@ -11,7 +11,7 @@ const SignUp = ()=> {
     const signupSchema = yup.object().shape({
 
         email: yup.string().email("Invalid email format").required("Please type your email address"),
-        password: yup.string().min(8, "Password must be at least 8 characters long.").required("A password is required"),
+        password: yup.string().min(3, "Password must be at least 8 characters long.").required("A password is required"),
         passwordConfirm: yup.string().oneOf([yup.ref("password")],"Passwords must match").required("Please retype your password to register")
     })
     interface FormData {
