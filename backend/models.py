@@ -66,7 +66,6 @@ class Choice(db.Model):
     def serialize(self):
         return {
             "id": self.id,
-            "poll_id": self.poll_id,
             "name": self.name,
             "description": self.description
         }
@@ -74,7 +73,6 @@ class Choice(db.Model):
 class Pollee(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(50), nullable=False)
-    list_id = db.Column(db.Integer, db.ForeignKey("list.id"), nullable=True)
     user_id= db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     user = db.relationship("User", back_populates="pollees")
@@ -118,6 +116,13 @@ class PollAssignment(db.Model):
             "poll_id": self.poll_id,
             "pollee_id": self.pollee_id
         }
+
+class ListAssignement(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id= db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    list_id = db.Column(db.String(50), nullable=False)
+    poll_id = db.Column(db.Integer, db.ForeignKey('poll.id'), nullable=False)
+
 class Vote(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     pollee_id = db.Column(db.Integer, db.ForeignKey("pollee.id"), nullable=False)

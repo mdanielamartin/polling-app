@@ -9,7 +9,7 @@ from .utils import check_user, generate_url, send_token_email
 from datetime import timedelta, timezone, datetime
 from sqlalchemy import func
 
-api_blueprint = Blueprint("server", __name__)
+api_blueprint = Blueprint("api", __name__)
 
 @api_blueprint.route("/user/register", methods=["POST"])
 def add_user():
