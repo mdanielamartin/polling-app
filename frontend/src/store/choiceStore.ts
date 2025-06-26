@@ -4,48 +4,40 @@ import { create } from "zustand";
 
 const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
 
-interface PollState {
+interface ChoiceState {
     error: string | null;
     isLoading: boolean;
-    poll: Poll;
-    polls: Poll[];
-    createPoll: (data:PollData, token:string) => Promise<void>;
-    updatePoll: (data:PollData, token:string) => Promise<void>;
-    deletePoll: (data:PollData, token:string) => Promise<void>;
-    getPolls: (token:string) => Promise<void>;
+    choices: Choice[];
+    addChoice: (data:ChoiceData, token:string, poll_id:number) => Promise<void>;
+    updateChoice: (data:Choice, token:string, poll_id:number) => Promise<void>;
+    deleteChoice: (choice_id:number, token:string, poll_id:number) => Promise<void>;
+    getChoices: (poll_id:number,token:string) => Promise<void>;
     clearError: () => void;
 
 }
-interface Poll {
-  name: string | null;
+
+interface Choice {
   id: number | null;
-  user_id: number | null;
-  created_at: string | null;
-  publish_date: string | null;
-  closing_date: string | null;
-  time_limit_days: number | null;
-  status: string | null;
+  name: string | null;
   description: string | null;
 }
-interface PollData {
-  id: number | null;
+
+interface ChoiceData {
   name: string | null;
-  time_limit_days: number | null;
   description: string | null;
 }
 
 type ErrorResponse = { error: string }
 
-const usePollStore = create<PollState>((set) => ({
+const useChoiceStore = create<ChoiceState>((set) => ({
     error: null,
     isLoading: false,
-    polls: [],
-    poll: {name:null,id: null,user_id: null,created_at: null,publish_date:  null, closing_date:  null,time_limit_days: null,status: null,description:null},
+    choices: [],
 
-    createPoll: async (data: PollData, token: string) => {
+    addChoice: async (data: ChoiceData, token: string, poll_id:number) => {
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}poll/create`, {
+            const res = await fetch(`${backendURL}poll/${poll_id}/add/choice`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(data),
@@ -56,9 +48,8 @@ const usePollStore = create<PollState>((set) => ({
                 throw new Error(errorData || 'Login failed')
             }
 
-            const poll = await res.json()
-            set({ isLoading: false, poll: poll})
-
+            const choice = await res.json()
+            set((state) => ({isLoading: false, choices: [...state.choices,choice]}))
         } catch (err: unknown) {
             let message = 'Unexpected error'
             if (err instanceof Error) {
@@ -71,10 +62,10 @@ const usePollStore = create<PollState>((set) => ({
     },
 
 
-    updatePoll: async (data: PollData, token: string) => {
+    updateChoice: async (data: Choice, token: string, poll_id:number) => {
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}poll/update/${data.id}`, {
+            const res = await fetch(`${backendURL}poll/${poll_id}/update/choice`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(data),
@@ -85,8 +76,10 @@ const usePollStore = create<PollState>((set) => ({
                 throw new Error(errorData || 'Login failed')
             }
 
-            const poll = await res.json()
-            set({ isLoading: false, poll: poll})
+            const updated_choice = await res.json()
+
+            set((state)=>({isLoading:false, choices: state.choices.map((c)=>
+            c.id === updated_choice.id ? {...c,...updated_choice}:c)}))
 
         } catch (err: unknown) {
             let message = 'Unexpected error'
@@ -99,10 +92,10 @@ const usePollStore = create<PollState>((set) => ({
         }
     },
 
-    deletePoll: async (data: PollData, token: string) => {
+    deleteChoice: async (choice_id: number, token: string, poll_id:number) => {
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}poll/delete/${data.id}`, {
+            const res = await fetch(`${backendURL}poll/${poll_id}/delete/choice/${choice_id}`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             })
@@ -111,6 +104,10 @@ const usePollStore = create<PollState>((set) => ({
                 const errorData = await res.json()
                 throw new Error(errorData || 'Login failed')
             }
+
+            set((state)=>({isLoading:false, choices: state.choices.filter((c)=>
+            c.id !== choice_id)}))
+
         } catch (err: unknown) {
             let message = 'Unexpected error'
             if (err instanceof Error) {
@@ -122,10 +119,10 @@ const usePollStore = create<PollState>((set) => ({
         }
     },
 
-    getPolls: async ( token: string) => {
+    getChoices: async ( poll_id: number,token: string) => {
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}polls`, {
+            const res = await fetch(`${backendURL}poll/${poll_id}`, {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             })
@@ -134,8 +131,8 @@ const usePollStore = create<PollState>((set) => ({
                 const errorData = await res.json()
                 throw new Error(errorData || 'Login failed')
             }
-            const polls = await res.json()
-            set({ isLoading: false, polls: polls })
+            const poll_data = await res.json()
+            set({ isLoading: false, choices: poll_data.choices })
         } catch (err: unknown) {
             let message = 'Unexpected error'
             if (err instanceof Error) {
@@ -151,4 +148,4 @@ const usePollStore = create<PollState>((set) => ({
     },
 }));
 
-export default usePollStore;
+export default useChoiceStore;

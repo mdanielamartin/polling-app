@@ -4,48 +4,38 @@ import { create } from "zustand";
 
 const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
 
-interface PollState {
+interface ContactState {
     error: string | null;
     isLoading: boolean;
-    poll: Poll;
-    polls: Poll[];
-    createPoll: (data:PollData, token:string) => Promise<void>;
-    updatePoll: (data:PollData, token:string) => Promise<void>;
-    deletePoll: (data:PollData, token:string) => Promise<void>;
-    getPolls: (token:string) => Promise<void>;
+    contacts: Contact[];
+    addContact: (data:ContactData, token:string) => Promise<void>;
+    updateContact: (data:Contact, token:string) => Promise<void>;
+    deleteContacts: (ids: number[], token:string) => Promise<void>;
+    getContacts: (token:string) => Promise<void>;
     clearError: () => void;
 
 }
-interface Poll {
-  name: string | null;
+
+interface Contact {
   id: number | null;
-  user_id: number | null;
-  created_at: string | null;
-  publish_date: string | null;
-  closing_date: string | null;
-  time_limit_days: number | null;
-  status: string | null;
-  description: string | null;
+  email: string | null;
 }
-interface PollData {
-  id: number | null;
-  name: string | null;
-  time_limit_days: number | null;
-  description: string | null;
+
+interface ContactData {
+    email: string | null;
 }
 
 type ErrorResponse = { error: string }
 
-const usePollStore = create<PollState>((set) => ({
+const useContactStore = create<ContactState>((set) => ({
     error: null,
     isLoading: false,
-    polls: [],
-    poll: {name:null,id: null,user_id: null,created_at: null,publish_date:  null, closing_date:  null,time_limit_days: null,status: null,description:null},
+    contacts: [],
 
-    createPoll: async (data: PollData, token: string) => {
+    addContact: async (data: ContactData, token: string) => {
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}poll/create`, {
+            const res = await fetch(`${backendURL}pollee/add`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(data),
@@ -56,9 +46,8 @@ const usePollStore = create<PollState>((set) => ({
                 throw new Error(errorData || 'Login failed')
             }
 
-            const poll = await res.json()
-            set({ isLoading: false, poll: poll})
-
+            const contact = await res.json()
+            set((state) => ({isLoading: false, contacts: [...state.contacts,contact]}))
         } catch (err: unknown) {
             let message = 'Unexpected error'
             if (err instanceof Error) {
@@ -71,10 +60,10 @@ const usePollStore = create<PollState>((set) => ({
     },
 
 
-    updatePoll: async (data: PollData, token: string) => {
+    updateContact: async (data: Contact, token: string) => {
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}poll/update/${data.id}`, {
+            const res = await fetch(`${backendURL}pollee/update`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(data),
@@ -85,8 +74,10 @@ const usePollStore = create<PollState>((set) => ({
                 throw new Error(errorData || 'Login failed')
             }
 
-            const poll = await res.json()
-            set({ isLoading: false, poll: poll})
+            const updated_contact = await res.json()
+
+            set((state)=>({isLoading:false, contacts: state.contacts.map((c)=>
+            c.id === updated_contact.id ? {...c,...updated_contact}:c)}))
 
         } catch (err: unknown) {
             let message = 'Unexpected error'
@@ -99,18 +90,26 @@ const usePollStore = create<PollState>((set) => ({
         }
     },
 
-    deletePoll: async (data: PollData, token: string) => {
+    deleteContacts: async (contact_ids: number[], token: string) => {
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}poll/delete/${data.id}`, {
+            const res = await fetch(`${backendURL}pollee/delete}`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify(contact_ids),
             })
 
             if (!res.ok) {
                 const errorData = await res.json()
                 throw new Error(errorData || 'Login failed')
             }
+
+            const data = await res.json()
+            const deletions = new Set(data.deleted_ids)
+
+            set((state)=>({isLoading:false, contacts: state.contacts.filter((c)=>
+            !deletions.has(c.id) )}))
+
         } catch (err: unknown) {
             let message = 'Unexpected error'
             if (err instanceof Error) {
@@ -122,10 +121,10 @@ const usePollStore = create<PollState>((set) => ({
         }
     },
 
-    getPolls: async ( token: string) => {
+    getContacts: async ( token: string) => {
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}polls`, {
+            const res = await fetch(`${backendURL}pollees`, {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             })
@@ -134,8 +133,8 @@ const usePollStore = create<PollState>((set) => ({
                 const errorData = await res.json()
                 throw new Error(errorData || 'Login failed')
             }
-            const polls = await res.json()
-            set({ isLoading: false, polls: polls })
+            const contacts = await res.json()
+            set({ isLoading: false, contacts: contacts })
         } catch (err: unknown) {
             let message = 'Unexpected error'
             if (err instanceof Error) {
@@ -151,4 +150,4 @@ const usePollStore = create<PollState>((set) => ({
     },
 }));
 
-export default usePollStore;
+export default useContactStore;

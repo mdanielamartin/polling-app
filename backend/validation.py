@@ -20,7 +20,6 @@ class ChoiceSchema(Schema):
 class PolleeSchema(Schema):
     id = fields.Integer(required=False)
     email =  fields.Email(required=True, validate=Length(min=5, max=50))
-    list_id = fields.Integer(required=False)
 
 class PollAssignmentSchema(Schema):
     pollee_id = fields.Integer(required=True)
