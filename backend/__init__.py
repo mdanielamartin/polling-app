@@ -11,7 +11,7 @@ def create_app():
     app.config.from_object(Config)
     app.config["JWT_SECRET_KEY"] = "SUPERSTRONGSECRET"
     db.init_app(app)
-    app.register_blueprint(api_blueprint, url_prefix="/server")  # Prefix for your routes
+    app.register_blueprint(api_blueprint, url_prefix="/api")  # Prefix for your routes
     with app.app_context():
         db.create_all()
     return app

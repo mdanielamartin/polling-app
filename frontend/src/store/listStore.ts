@@ -4,64 +4,58 @@ import { create } from "zustand";
 
 const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
 
-interface PollState {
+interface ListState {
     error: string | null;
     isLoading: boolean;
-    poll: Poll;
-    polls: Poll[];
-    activation: boolean;
-    createPoll: (data:PollData, token:string) => Promise<void>;
-    updatePoll: (data:PollData, token:string) => Promise<void>;
-    deletePoll: (data:PollData, token:string) => Promise<void>;
-    getPolls: (token:string) => Promise<void>;
-    getPoll: (data:number, token:string) => Promise<void>;
+    lists: List[];
+    createList: (data:ListData, token:string) => Promise<void>;
+    updateList: (data:ListData,token:string) => Promise<void>;
+    deleteList: (listId:number, token:string) => Promise<void>;
+    addToList: (data:number[],listId:number, token:string) => Promise<void>;
+    deleteFromList: (data:number[],listId:number, token:string) => Promise<void>;
+    getLists: (token:string) => Promise<void>;
     clearError: () => void;
 
 }
-interface Poll {
-  name: string | null;
+
+interface List {
   id: number | null;
-  user_id: number | null;
-  created_at: string | null;
-  publish_date: string | null;
-  closing_date: string | null;
-  time_limit_days: number | null;
-  status: string | null;
-  description: string | null;
+  name: string | null;
+  pollees: Pollee[]
 }
-interface PollData {
-  id: number | null;
-  name: string | null;
-  time_limit_days: number | null;
-  description: string | null;
+
+interface Pollee {
+    id: number;
+    email: string;
+
+}
+
+interface ListData {
+    id:string | null;
+    name: string | null;
 }
 
 type ErrorResponse = { error: string }
 
-const usePollStore = create<PollState>((set) => ({
+const useListStore = create<ListState>((set) => ({
     error: null,
     isLoading: false,
-    polls: [],
-    activation: false,
-    poll: {name:null,id: null,user_id: null,created_at: null,publish_date:  null, closing_date:  null,time_limit_days: null,status: null,description:null},
+    lists: [],
 
-    createPoll: async (data: PollData, token: string) => {
+    createList: async (data: ListData, token: string) => {
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}poll/create`, {
+            const res = await fetch(`${backendURL}list/create`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(data),
             })
-
             if (!res.ok) {
                 const errorData = await res.json()
                 throw new Error(errorData || 'Login failed')
             }
-
-            const poll = await res.json()
-            set({ isLoading: false, poll: poll})
-
+            const list = await res.json()
+            set((state) => ({isLoading: false, lists: [...state.lists,list]}))
         } catch (err: unknown) {
             let message = 'Unexpected error'
             if (err instanceof Error) {
@@ -74,10 +68,10 @@ const usePollStore = create<PollState>((set) => ({
     },
 
 
-    updatePoll: async (data: PollData, token: string) => {
+    updateList: async ( data:ListData,token: string) => {
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}poll/update/${data.id}`, {
+            const res = await fetch(`${backendURL}list/update`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(data),
@@ -88,8 +82,10 @@ const usePollStore = create<PollState>((set) => ({
                 throw new Error(errorData || 'Login failed')
             }
 
-            const poll = await res.json()
-            set({ isLoading: false, poll: poll})
+            const updated_list = await res.json()
+
+            set((state)=>({isLoading:false, lists: state.lists.map((c)=>
+            c.id === updated_list.id ? {...c,...updated_list}:c)}))
 
         } catch (err: unknown) {
             let message = 'Unexpected error'
@@ -102,10 +98,10 @@ const usePollStore = create<PollState>((set) => ({
         }
     },
 
-    deletePoll: async (data: PollData, token: string) => {
+    deleteList: async (listId: number, token: string) => {
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}poll/delete/${data.id}`, {
+            const res = await fetch(`${backendURL}list/delete/${listId}`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             })
@@ -114,6 +110,10 @@ const usePollStore = create<PollState>((set) => ({
                 const errorData = await res.json()
                 throw new Error(errorData || 'Login failed')
             }
+
+            set((state)=>({isLoading:false, lists: state.lists.filter((c)=>
+            c.id !== listId)}))
+
         } catch (err: unknown) {
             let message = 'Unexpected error'
             if (err instanceof Error) {
@@ -125,10 +125,68 @@ const usePollStore = create<PollState>((set) => ({
         }
     },
 
-    getPolls: async ( token: string) => {
+    addToList: async(idList:number[],listId:number,token:string) =>
+        {
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}polls`, {
+            const res = await fetch(`${backendURL}list/${listId}/add/pollee`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify(idList),
+            })
+            if (!res.ok) {
+                const errorData = await res.json()
+                throw new Error(errorData || 'Login failed')
+            }
+            const updated_list = await res.json()
+            set((state)=>({isLoading:false, lists: state.lists.map((c)=>
+            c.id === updated_list.id ? {...c,...updated_list}:c)}))
+
+        } catch (err: unknown) {
+            let message = 'Unexpected error'
+            if (err instanceof Error) {
+                message = err.message
+            } else if (typeof err === 'object' && err !== null && 'error' in err) {
+                message = (err as ErrorResponse).error
+            }
+            set({ error: message, isLoading: false })
+        }
+
+        },
+        deleteFromList: async(idList:number[],listId:number,token:string) =>
+        {
+        set({ isLoading: true, error: null })
+        try {
+            const res = await fetch(`${backendURL}list/${listId}/delete/pollee`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify(idList),
+            })
+            if (!res.ok) {
+                const errorData = await res.json()
+                throw new Error(errorData || 'Login failed')
+            }
+            const updated_list = await res.json()
+
+            set((state)=>({isLoading:false, lists: state.lists.map((c)=>
+            c.id === updated_list.id ? {...c,...updated_list}:c)}))
+
+        } catch (err: unknown) {
+            let message = 'Unexpected error'
+            if (err instanceof Error) {
+                message = err.message
+            } else if (typeof err === 'object' && err !== null && 'error' in err) {
+                message = (err as ErrorResponse).error
+            }
+            set({ error: message, isLoading: false })
+        }
+
+        },
+
+    getLists: async ( token: string) => {
+        set({ isLoading: true, error: null })
+        try {
+            const res = await fetch(`${backendURL}lists`, {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             })
@@ -137,8 +195,8 @@ const usePollStore = create<PollState>((set) => ({
                 const errorData = await res.json()
                 throw new Error(errorData || 'Login failed')
             }
-            const polls = await res.json()
-            set({ isLoading: false, polls: polls })
+            const lists = await res.json()
+            set({ isLoading: false, lists: lists })
         } catch (err: unknown) {
             let message = 'Unexpected error'
             if (err instanceof Error) {
@@ -149,71 +207,9 @@ const usePollStore = create<PollState>((set) => ({
             set({ error: message, isLoading: false })
         }
     },
-
-     getPoll: async ( pollId:number, token: string) => {
-        set({ isLoading: true, error: null })
-        try {
-            const res = await fetch(`${backendURL}poll/${pollId}`, {
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            })
-
-            if (!res.ok) {
-                const errorData = await res.json()
-                throw new Error(errorData || 'Login failed')
-            }
-            const poll = await res.json()
-            set({ isLoading: false, poll: poll })
-        } catch (err: unknown) {
-            let message = 'Unexpected error'
-            if (err instanceof Error) {
-                message = err.message
-            } else if (typeof err === 'object' && err !== null && 'error' in err) {
-                message = (err as ErrorResponse).error
-            }
-            set({ error: message, isLoading: false })
-        }
-    },
-
-    activatePoll: async (pollId:number, token:string) => {
-        set({ isLoading: true, error: null })
-        try {
-            const res = await fetch(`${backendURL}poll/${pollId}`, {
-                method: 'PUT',
-                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-            })
-
-             if (!res.ok) {
-                const errorData = await res.json();
-                let errorMessage = "Activation failed";
-                if (typeof errorData === "string") {
-                    errorMessage = errorData;}
-                else if (typeof errorData === "object" && errorData !== null && "error" in errorData) {
-                    if (Array.isArray(errorData.error)) {
-                    errorMessage = `Failed to send emails: ${errorData.error.join(", ")}`;
-                    } else {
-                    errorMessage = errorData.error;
-                }}
-
-                throw new Error(errorMessage);
-            }
-            set({ isLoading: false, activation: true })
-        } catch (err: unknown) {
-            set({ error: err instanceof Error ? err.message : "Unexpected error", isLoading: false });
-
-        }
-
-
-    },
-
-
     clearError: () => {
         set({ error: null })
     },
-
-    clearActivation: () => {
-        set({ error: null, activation:false })
-    },
 }));
 
-export default usePollStore;
+export default useListStore;

@@ -5,6 +5,7 @@ from sqlalchemy.sql import func
 
 db = SQLAlchemy()
 created_at = datetime.now(timezone.utc)
+
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(50), nullable=False)
@@ -13,6 +14,7 @@ class User(db.Model):
     polls = db.relationship("Poll",back_populates = "user",  cascade="all, delete-orphan")
     pollees = db.relationship("Pollee", back_populates="user",  cascade="all, delete-orphan")
     lists = db.relationship("List", back_populates="user",  cascade="all, delete-orphan")
+
 def get_utc_time():
     return datetime.now(timezone.utc)
 
@@ -40,6 +42,7 @@ class Poll(db.Model):
             "user_id": self.user_id,
             "created_at": self.created_at,
             "status": self.status,
+            "description":self.description,
             "publish_date": self.publish_date,
             "closing_date": self.closing_date,
             "time_limit_days": self.time_limit_days
@@ -66,34 +69,38 @@ class Choice(db.Model):
     def serialize(self):
         return {
             "id": self.id,
-            "poll_id": self.poll_id,
             "name": self.name,
             "description": self.description
         }
 
+list_member = db.Table('list_member',
+    db.Column('pollee_id', db.Integer, db.ForeignKey('pollee.id'), primary_key=True),
+    db.Column('list_id', db.Integer, db.ForeignKey('list.id'), primary_key=True)
+)
+
 class Pollee(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String(50), nullable=False)
-    list_id = db.Column(db.Integer, db.ForeignKey("list.id"), nullable=True)
     user_id= db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
 
     user = db.relationship("User", back_populates="pollees")
-    list = db.relationship("List", back_populates="pollees")
+    lists = db.relationship("List", secondary=list_member, back_populates="pollees")
     assignments = db.relationship("PollAssignment", back_populates="pollee",  cascade="all, delete-orphan")
 
     def serialize(self):
         return {
             "id": self.id,
             "email": self.email,
-            "list": self.list_id,
         }
+
 class List(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id= db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     name = db.Column(db.String(50), nullable=False)
 
-    pollees = db.relationship("Pollee", back_populates="list",  cascade="all, delete-orphan")
     user = db.relationship("User",back_populates = "lists")
+    pollees = db.relationship("Pollee", secondary=list_member, back_populates="lists")
+
 
     def serialize(self):
         return {
@@ -101,6 +108,9 @@ class List(db.Model):
             "name": self.name,
             "pollees": [pollee.serialize() for pollee in self.pollees]
         }
+
+
+
 
 class PollAssignment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -116,8 +126,12 @@ class PollAssignment(db.Model):
         return {
             "id": self.id,
             "poll_id": self.poll_id,
-            "pollee_id": self.pollee_id
+            "pollee_id": self.pollee_id,
+            "email": self.pollee.email
         }
+
+
+
 class Vote(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     pollee_id = db.Column(db.Integer, db.ForeignKey("pollee.id"), nullable=False)
