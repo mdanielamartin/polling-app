@@ -9,10 +9,12 @@ interface PollState {
     isLoading: boolean;
     poll: Poll;
     polls: Poll[];
+    activation: boolean;
     createPoll: (data:PollData, token:string) => Promise<void>;
     updatePoll: (data:PollData, token:string) => Promise<void>;
     deletePoll: (data:PollData, token:string) => Promise<void>;
     getPolls: (token:string) => Promise<void>;
+    getPoll: (data:number, token:string) => Promise<void>;
     clearError: () => void;
 
 }
@@ -40,6 +42,7 @@ const usePollStore = create<PollState>((set) => ({
     error: null,
     isLoading: false,
     polls: [],
+    activation: false,
     poll: {name:null,id: null,user_id: null,created_at: null,publish_date:  null, closing_date:  null,time_limit_days: null,status: null,description:null},
 
     createPoll: async (data: PollData, token: string) => {
@@ -146,8 +149,70 @@ const usePollStore = create<PollState>((set) => ({
             set({ error: message, isLoading: false })
         }
     },
+
+     getPoll: async ( pollId:number, token: string) => {
+        set({ isLoading: true, error: null })
+        try {
+            const res = await fetch(`${backendURL}poll/${pollId}`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            })
+
+            if (!res.ok) {
+                const errorData = await res.json()
+                throw new Error(errorData || 'Login failed')
+            }
+            const poll = await res.json()
+            set({ isLoading: false, poll: poll })
+        } catch (err: unknown) {
+            let message = 'Unexpected error'
+            if (err instanceof Error) {
+                message = err.message
+            } else if (typeof err === 'object' && err !== null && 'error' in err) {
+                message = (err as ErrorResponse).error
+            }
+            set({ error: message, isLoading: false })
+        }
+    },
+
+    activatePoll: async (pollId:number, token:string) => {
+        set({ isLoading: true, error: null })
+        try {
+            const res = await fetch(`${backendURL}poll/${pollId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            })
+
+             if (!res.ok) {
+                const errorData = await res.json();
+                let errorMessage = "Activation failed";
+                if (typeof errorData === "string") {
+                    errorMessage = errorData;}
+                else if (typeof errorData === "object" && errorData !== null && "error" in errorData) {
+                    if (Array.isArray(errorData.error)) {
+                    errorMessage = `Failed to send emails: ${errorData.error.join(", ")}`;
+                    } else {
+                    errorMessage = errorData.error;
+                }}
+
+                throw new Error(errorMessage);
+            }
+            set({ isLoading: false, activation: true })
+        } catch (err: unknown) {
+            set({ error: err instanceof Error ? err.message : "Unexpected error", isLoading: false });
+
+        }
+
+
+    },
+
+
     clearError: () => {
         set({ error: null })
+    },
+
+    clearActivation: () => {
+        set({ error: null, activation:false })
     },
 }));
 
