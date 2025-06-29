@@ -3,49 +3,55 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup"
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Label, Dropdown, DropdownItem, TextInput, Textarea, Button } from "flowbite-react"
-import { useState, useEffect } from "react"
+import { useState, useEffect} from "react"
+import usePollStore from "../src/store/pollStore";
+import useUserStore from "../src/store/userStore";
 
 
 const EditPollTab = () => {
     const [selectedDay, setSelectedDay] = useState(0)
     const days = [...Array(30)].map((_, i) => i + 1)
-
+    const {poll, updatePoll} = usePollStore()
+    const {token} = useUserStore()
     const pollSchema = yup.object().shape({
 
         name: yup.string().min(3, "Name must be at least 3 characters long").max(50, "Name must not exceed 50 characters").required("Poll must have a name/question or instruction"),
-        duration: yup.number().min(1, "Polls minimum duration is 1 day").max(30, "Polls maximum duration is 30 days").required("Please specify the poll's duration"),
+        time_limit_days: yup.number().min(1, "Polls minimum duration is 1 day").max(30, "Polls maximum duration is 30 days").required("Please specify the poll's duration"),
         description: yup.string().max(255, "Description cannot exceed 255 characters.")
     })
 
     interface FormData {
+        id: number;
         name: string;
-        duration: number;
+        time_limit_days: number;
         description: string;
     }
 
     const { register, setValue, reset, handleSubmit, formState: { errors } } = useForm({ resolver: yupResolver(pollSchema) })
 
-    const onSubmit = (data: FormData) => {
-        console.log("Form Data:", data);
+    const onSubmit = async (data: FormData) => {
+        await updatePoll(data,token)
     };
 
-    const sample = {name:"A poll sample","description":"My Poll has been created. Check it out","duration":5}
 
     useEffect(() => {
         if (selectedDay !== null) {
-            setValue("duration", selectedDay)
+            setValue("time_limit_days", selectedDay)
         }
 
     }, [selectedDay, setValue])
 
     useEffect(()=>{
-        reset(sample)
-        setSelectedDay(sample.duration)
 
-    },[reset,setSelectedDay])
+        if (poll){
+           const initialValues = {id:poll.id,name:poll.name,description:poll.description,time_limit_days:poll.time_limit_days}
+            reset(initialValues)
+            setSelectedDay(initialValues.time_limit_days)
+        }
+
+    },[reset,setSelectedDay,poll])
 
     return (
-
         <div className="bg-gray-100 h-auto min-w-95/100 rounded-xl px-4 py- mx-auto  my-4 justify-center ">
             <form className="mx-auto p-4" onSubmit={handleSubmit(onSubmit)}>
                 <div className="grid grid-cols-1 grid-rows-4 sm:grid-cols-4 sm:grid-rows-2 gap-x-4 gap-y-0">
@@ -67,7 +73,7 @@ const EditPollTab = () => {
                                 )
                             })}
                         </Dropdown>
-                        <p className="text-red-500">{errors.duration?.message}</p>
+                        <p className="text-red-500">{errors.time_limit_days?.message}</p>
                     </div>
                     <div className="sm:col-span-3 sm:row-start-2">
                         <div className="mb-2 block">

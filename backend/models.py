@@ -45,17 +45,16 @@ class Poll(db.Model):
             "description":self.description,
             "publish_date": self.publish_date,
             "closing_date": self.closing_date,
-            "time_limit_days": self.time_limit_days
+            "time_limit_days": self.time_limit_days,
+            "choices": [choice.serialize() for choice in self.choices]
         }
+
     def pollee_view(self):
         return {
             "name": self.name,
             "id": self.id,
+            "description":self.description,
             "choices":[choice.serialize() for choice in self.choices]}
-    def get_results(self):
-        return {
-            "votes": [vote.serialize() for vote in self.votes]
-        }
 
 class Choice(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -108,8 +107,6 @@ class List(db.Model):
             "name": self.name,
             "pollees": [pollee.serialize() for pollee in self.pollees]
         }
-
-
 
 
 class PollAssignment(db.Model):

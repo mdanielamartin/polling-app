@@ -1,14 +1,17 @@
 "use client"
 import { Button, Checkbox, Label, TextInput } from "flowbite-react";
 import { useForm } from "react-hook-form";
+import { useRouter } from 'next/navigation'
 import * as yup from "yup"
 import { yupResolver } from "@hookform/resolvers/yup";
 import useUserStore from "../../src/store/userStore";
+import { showLoginError } from "../../utils/alerts";
+import { useEffect } from "react";
 
 const Login = () => {
-  const {login,token} = useUserStore()
+  const router = useRouter()
+  const {login,error} = useUserStore()
   const loginSchema = yup.object().shape({
-
     email: yup.string().email("Invalid email format").required("Please type your email address"),
     password: yup.string().min(8, "Password must be at least 8 characters long.").required("A password is required"),
   })
@@ -19,10 +22,19 @@ const Login = () => {
   }
 
   const { register, handleSubmit, formState: { errors } } = useForm({ resolver: yupResolver(loginSchema) })
+
   const onSubmit = async (data: FormData) => {
-    await login(data)
-    console.log(token)
+    const status = await login(data)
+    if (status){
+      router.push("dashboard/")
   }
+}
+
+useEffect(()=>{
+  if (error){
+      showLoginError(error)
+    }
+},[error])
   return (
     <div className="flex h-screen items-center justify-center">
       <form onSubmit={handleSubmit(onSubmit)} className="flex max-w-md max-w-lg w-full flex-col gap-4 rounded-md p-6">

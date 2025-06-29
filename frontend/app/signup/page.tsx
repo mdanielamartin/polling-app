@@ -3,11 +3,16 @@
 import { Button, Checkbox, Label, TextInput } from "flowbite-react";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
+import { useRouter } from 'next/navigation'
 import * as yup from "yup"
 import { yupResolver } from "@hookform/resolvers/yup";
+import useUserStore from "../../src/store/userStore";
+import { showRegistrationError } from "../../utils/alerts";
+import { useEffect } from "react";
 
 const SignUp = ()=> {
-
+    const {signup,error} = useUserStore()
+    const router = useRouter()
     const signupSchema = yup.object().shape({
 
         email: yup.string().email("Invalid email format").required("Please type your email address"),
@@ -22,9 +27,18 @@ const SignUp = ()=> {
     const {register, handleSubmit, formState:{errors}} = useForm({resolver: yupResolver(signupSchema)})
 
 
-    const onSubmit = (data: FormData) => {
-    console.log("Form Data:", data);
-  };
+    const onSubmit = async (data: FormData) => {
+      const status = await signup(data)
+      if (status){
+        router.push("login/")
+    }
+  }
+
+  useEffect(()=>{
+    if (error){
+        showRegistrationError(error)
+      }
+  },[error])
 
   return (
     <div className="flex h-screen items-center justify-center">

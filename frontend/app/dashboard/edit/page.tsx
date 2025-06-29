@@ -1,8 +1,25 @@
-
+"use client"
 import { Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, Button, ButtonGroup} from "flowbite-react";
+import usePollStore from "../../../src/store/pollStore";
+import useUserStore from "../../../src/store/userStore";
+import { useEffect} from "react";
+import { showPollError } from "../../../utils/alerts";
 
 const EditPolls = () => {
 
+const {polls, getPolls, deletePoll, error} = usePollStore()
+const token = useUserStore.getState().token
+
+useEffect(()=>{
+  const onLoad = async() => {
+    await getPolls(token)
+  }
+  onLoad()
+
+  if (error){
+    showPollError(error)
+  }
+},[error])
 
 return (
     <div className="flex min-h-screen w-full justify-center m-2">
@@ -18,18 +35,21 @@ return (
           </TableRow>
         </TableHead>
         <TableBody className="divide-y">
-          <TableRow className="bg-gray-50 hover:bg-gray-200">
+          {polls?.map((poll)=>(
+          <TableRow key={poll.id} className="bg-gray-50 hover:bg-gray-200">
             <TableCell className="whitespace-nowrap font-normal text-md text-center font-medium text-black ">
-              Birthday Party Places
+              {poll.name}
             </TableCell>
-            <TableCell className="text-center text-dark">June 16, 2025</TableCell>
-            <TableCell className="text-center text-dark">3 days</TableCell>
+            <TableCell className="text-center text-dark">{poll.created_at}</TableCell>
+            <TableCell className="text-center text-dark">{poll.time_limit_days}</TableCell>
             <TableCell className="text-center">    <ButtonGroup>
-      <Button color="red">Delete</Button>
-      <Button color="alternative">Launch</Button>
-      <Button color="alternative">Edit</Button>
+            <Button color="red" onClick={async ()=>{await deletePoll(poll.id,token)}}>Delete</Button>
+            <Button color="alternative">Launch</Button>
+            <Button color="alternative">Edit</Button>
     </ButtonGroup></TableCell>
           </TableRow>
+
+          ))}
         </TableBody>
       </Table>
     </div>

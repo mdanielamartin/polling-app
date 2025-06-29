@@ -146,6 +146,9 @@ const useChoiceStore = create<ChoiceState>((set) => ({
     clearError: () => {
         set({ error: null })
     },
+    setChoices: (choices: Choice[]) =>{
+        set({ choices:choices})
+    }
 }));
 
 export default useChoiceStore;
