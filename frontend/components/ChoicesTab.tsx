@@ -16,7 +16,7 @@ const ChoicesTab = () => {
     const slug = Number(params.slug)
 
     const [editing, setEditing] = useState<number | null>(null)
-    const {choices, getChoices, addChoice, updateChoice} = useChoiceStore()
+    const {choices, getChoices, addChoice, updateChoice, deleteChoice} = useChoiceStore()
     const {token} = useUserStore()
 
     const choiceSchema = yup.object().shape({
@@ -55,6 +55,9 @@ const ChoicesTab = () => {
     const editingRequest = (data:   FormData, id: number) => {
         setEditing(id)
         resetEdit({ name: data.name, description: data.description })
+    }
+    const deleteChoiceButton = async (id:number)=>{
+        await deleteChoice(id,token,slug)
     }
 
     const onLoad = async ()=>{
@@ -140,7 +143,7 @@ const ChoicesTab = () => {
                                     </div>
                                 </div>
                                 <div className="flex flex-col sm:flex-row sm:justify-between w-1/7 sm:w-auto gap-2 mr-5">
-                                    <Button color="red"><FaTrash className="text-lg" /></Button>
+                                    <Button color="red" onClick={()=>deleteChoiceButton(choice.id)}><FaTrash className="text-lg" /></Button>
                                     <Button color="yellow" onClick={() => editingRequest(choice, choice.id)}><FaEdit className="text-lg" /></Button>
                                 </div>
                             </ListItem>

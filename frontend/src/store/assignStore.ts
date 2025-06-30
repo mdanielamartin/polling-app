@@ -8,7 +8,7 @@ interface AssigmentState {
     isLoading: boolean;
     assignments: Assignment[];
     addAssignments: (ids: number[], token:string, pollId:number) => Promise<void>;
-    deleteAssignments: (ids: number[], token:string, pollId: number) => Promise<void>;
+    removeAssignments: (ids: number[], token:string, pollId: number) => Promise<void>;
     getAssignments: (token:string, pollId:number) => Promise<void>;
     clearError: () => void;
 
@@ -56,7 +56,7 @@ const useAssignStore = create<AssigmentState>((set) => ({
         }
     },
 
-    deleteAssignments: async (contactIds: number[], token: string, pollId: number) => {
+    removeAssignments: async (contactIds: number[], token: string, pollId: number) => {
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}pollee/assignment/${pollId}}`, {
@@ -73,7 +73,7 @@ const useAssignStore = create<AssigmentState>((set) => ({
             const data = await res.json()
             const deletions = new Set(data.deleted_ids)
 
-            set((state)=>({isLoading:false, contacts: state.assignments.filter((c)=>
+            set((state)=>({isLoading:false, assignments: state.assignments.filter((c)=>
             !deletions.has(c.id) )}))
 
         } catch (err: unknown) {
