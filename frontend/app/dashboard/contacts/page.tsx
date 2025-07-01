@@ -1,18 +1,22 @@
 "use client"
 import { Checkbox, TextInput, Tabs, TabItem, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, Button, ButtonGroup } from "flowbite-react";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaTrash } from "react-icons/fa";
-import AddContactModal from "../../../components/AddContactModal";
 import AddListModal from "../../../components/AddListModal";
 import ListSelectionModal from "../../../components/ListSelectionModal";
 import ConfirmDeletion from "../../../components/ConfirmDeletion";
 import { useForm } from "react-hook-form";
+import useUserStore from "../../../src/store/userStore";
+import useContactStore from "../../../src/store/contactStore";
+import useListStore from "../../../src/store/listStore";
 import * as yup from "yup"
 import { yupResolver } from "@hookform/resolvers/yup";
 const Contacts = () => {
 
-
+    const {token}= useUserStore()
+    const {getLists, lists} = useListStore()
+    const {getContacts,contacts} = useContactStore()
     const contactSchema = yup.object().shape({
 
         email: yup.string().email("Invalid email format").required("Please provide your contact's email address"),
@@ -25,14 +29,9 @@ const Contacts = () => {
     }
 
     const { register, handleSubmit, formState: { errors } } = useForm({ resolver: yupResolver(contactSchema) })
+    const [selection, setSelection] = useState<number[]>([])
+    const [listSelection, setListSelection] = useState<number[]>([])
 
-
-    const [selection, setSelection] = useState([])
-    const [listSelection, setListSelection] = useState([])
-
-
-    const contacts = [{ "id": 1, "email": "sapegato.com" }, { "id": 2, "email": "donpeto.com" }, { "id": 3, "email": "otroemail@gmail.com" }, { "id": 4, "email": "mail@gmail.com" }, { "id": 5, "email": "miemail@domain.com" }, { "id": 6, "email": "myemail@gmail.com" }]
-    const work = [{ "id": 1, "email": "sapegato.com" }, { "id": 2, "email": "donpeto.com" }, { "id": 3, "email": "otroemail@gmail.com" }]
 
     interface ContactData {
         id: number,
@@ -45,30 +44,39 @@ const Contacts = () => {
 
     const handleCheck = (contact: ContactData) => {
         setSelection(prev =>
-            prev.some(c => c.id === contact.id) ? prev.filter(c => c.id !== contact.id) : [...prev, contact]
+            prev.some(c => c === contact.id) ? prev.filter(c => c !== contact.id) : [...prev, contact.id]
         )
     }
 
     const handleCheckAll = () => {
-        setSelection(selection.length === contacts.length ? [] : contacts)
+        setSelection(selection.length === contacts.length ? [] : contacts?.map(c => c.id))
     }
 
     const handleListCheck = (contact: ContactData) => {
         setListSelection(prev =>
-            prev.some(c => c.id === contact.id) ? prev.filter(c => c.id !== contact.id) : [...prev, contact]
+            prev.some(c => c === contact.id) ? prev.filter(c => c !== contact.id) : [...prev, contact.id]
         )
     }
 
-    const handleListCheckAll = () => {
-        setListSelection(work.length === listSelection.length ? [] : work)
+    const handleListCheckAll = (list) => {
+        setListSelection(list.pollees.length === listSelection.length ? [] : list.pollees.map(l => l.id))
     }
+
+    useEffect(()=>{
+        const onLoad = async ()=>{
+            await getContacts(token)
+            await getLists(token)
+        }
+
+        onLoad()
+    },[])
     return (
         <div className="flex flex-cols min-h-screen w-full justify-center m-2">
-            <Tabs className="min-w-8/10 max-w-9/10" aria-label="Pills" variant="pills">
+            <Tabs className="min-w-8/10 max-w-9/10" aria-label="Pills" variant="pills"
+            onActiveTabChange={() => {setSelection([]); setListSelection([])}}>
                 <TabItem active title="All">
                     <div className="flex place-content-between mb-5">
-                        <AddContactModal />
-                        <ListSelectionModal />
+                        <ListSelectionModal contactIds = {selection} />
                         <AddListModal />
                         <   ConfirmDeletion message="Are you sure you want to delete the selected contacts?" title=
                             {
@@ -77,7 +85,6 @@ const Contacts = () => {
                                     Delete Selection
                                 </span>}
                         />
-
                     </div>
                     <form className="flex place-content-around w-full my-3 items-center" onSubmit={handleSubmit(onSubmit)}>
 
@@ -102,7 +109,7 @@ const Contacts = () => {
                             {contacts.map(contact => (
                                 <TableRow key={contact.id} className="bg-white hover:bg-gray-100">
                                     <TableCell>
-                                        <Checkbox checked={selection.some(c => c.id === contact.id)}
+                                        <Checkbox checked={selection.some(c => c === contact.id)}
                                             onChange={() => handleCheck(contact)} />
                                     </TableCell>
                                     <TableCell className="whitespace-nowrap font-normal text-md text-start font-medium text-black ">
@@ -118,12 +125,13 @@ const Contacts = () => {
                         </TableBody>
                     </Table>
                 </TabItem>
-                <TabItem title="Work">
+                {lists?.map((list)=>(
+                <TabItem key={list.id} title={list.name}>
                     <Table className="w-full shadow-md bg-gray-500 rounded-lg">
                         <TableHead className="bg-gray-500">
                             <TableRow className="bg-gray-500">
                                 <TableHeadCell>
-                                    <Checkbox checked={work.length === listSelection.length} onChange={() => handleListCheckAll()} />
+                                    <Checkbox checked={list.pollees.length === listSelection.length} onChange={() => handleListCheckAll(list)} />
                                 </TableHeadCell>
                                 <TableHeadCell className="font-bold text-start text-lg text-black normal-case">Email</TableHeadCell>
                                 <TableHeadCell>
@@ -132,10 +140,10 @@ const Contacts = () => {
                             </TableRow>
                         </TableHead>
                         <TableBody className="divide-y">
-                            {work.map(contact => (
+                            {list.pollees?.map(contact => (
                                 <TableRow key={contact.id} className="bg-white hover:bg-gray-100">
                                     <TableCell>
-                                        <Checkbox checked={listSelection.some(c => c.id === contact.id)}
+                                        <Checkbox checked={listSelection.some(c => c === contact.id)}
                                             onChange={() => handleListCheck(contact)} />
                                     </TableCell>
                                     <TableCell className="whitespace-nowrap font-normal text-md text-start font-medium text-black ">
@@ -146,15 +154,11 @@ const Contacts = () => {
                                         <Button color="alternative">Edit</Button>
                                     </ButtonGroup></TableCell>
                                 </TableRow>
-
-
                             ))}
                         </TableBody>
                     </Table>
                 </TabItem>
-                <TabItem title="Friends">
-                    <p className="text-sm text-gray-500 dark:text-gray-400">Friends</p>
-                </TabItem>
+                ))}
             </Tabs>
 
         </div>

@@ -2,12 +2,22 @@
 
 import { Button, Label, Modal, ModalBody, ModalHeader, TextInput, ModalFooter } from "flowbite-react";
 import { useState } from "react";
-
+import useListStore from "../src/store/listStore";
 import { MdFormatListBulletedAdd } from "react-icons/md";
+import useUserStore from "../src/store/userStore";
 const AddListModal = () => {
     const [openModal, setOpenModal] = useState(false);
+    const [name,setName] = useState("")
+    const {createList} = useListStore()
+    const {token} = useUserStore()
     function onCloseModal() {
         setOpenModal(false);
+    }
+
+    const createListButton = async () => {
+        if (name.length > 2){
+            await createList(name,token)}
+            setOpenModal(false);
     }
 
     return (
@@ -23,7 +33,7 @@ const AddListModal = () => {
                                     <div className="mb-2 block">
                                         <Label className="text-md" htmlFor="list">List Name</Label>
                                     </div>
-                                    <TextInput id="list" type="text" placeholder="My List..." required />
+                                    <TextInput id="list" value={name} onChange={(e)=>setName(e.target.value)} type="text" placeholder="My List..." required />
                                 </div>
                             </div>
                         </form>
@@ -32,8 +42,8 @@ const AddListModal = () => {
                 </ModalBody>
                 <ModalFooter className="-mt-5">
                     <div className="flex justify-center space-x-4 w-full">
-                     <Button color="red" className="shadow-lg hover:shadow-xl">Cancel</Button>
-                     <Button color="cyan" className="shadow-lg hover:shadow-xl" form="list" type="submit">Create</Button>
+                     <Button color="red" className="shadow-lg hover:shadow-xl" onClick={()=>setOpenModal(false)}>Cancel</Button>
+                     <Button color="cyan" className="shadow-lg hover:shadow-xl" form="list" onClick={()=>createListButton()}>Create</Button>
                     </div>
                 </ModalFooter>
             </Modal>
