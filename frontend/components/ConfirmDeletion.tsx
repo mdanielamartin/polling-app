@@ -3,13 +3,25 @@
 import { Button, Modal, ModalBody, ModalHeader } from "flowbite-react";
 import React, { useState } from "react";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
+import useUserStore from "../src/store/userStore";
+import useContactStore from "../src/store/contactStore";
 
-
-const ConfirmDeletion = ({message,title}) => {
+const ConfirmDeletion = ({message,title, contactIds, onActionComplete}) => {
   const [openModal, setOpenModal] = useState(false);
+  const {token} = useUserStore()
+  const { deleteContacts} = useContactStore()
+
+
+  const confirmDeletion = async () => {
+
+    await deleteContacts(contactIds,token)
+    onActionComplete()
+    setOpenModal(false)
+  }
+
   return (
     <>
-      <Button color="red" onClick={() => setOpenModal(true)}>{title}</Button>
+      <Button color="red" disabled={contactIds.length > 0 ? false:true} onClick={() => setOpenModal(true)}>{title}</Button>
       <Modal show={openModal} size="md" onClose={() => setOpenModal(false)} popup>
         <ModalHeader />
         <ModalBody>
@@ -19,11 +31,11 @@ const ConfirmDeletion = ({message,title}) => {
               {message}
             </h3>
             <div className="flex justify-center gap-4">
-              <Button color="red" onClick={() => setOpenModal(false)}>
-                Confirm
-              </Button>
               <Button color="alternative" onClick={() => setOpenModal(false)}>
                 Cancel
+              </Button>
+              <Button color="alternative" onClick={() => confirmDeletion()}>
+                Confirm
               </Button>
             </div>
           </div>

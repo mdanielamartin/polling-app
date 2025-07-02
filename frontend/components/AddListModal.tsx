@@ -5,10 +5,10 @@ import { useState } from "react";
 import useListStore from "../src/store/listStore";
 import { MdFormatListBulletedAdd } from "react-icons/md";
 import useUserStore from "../src/store/userStore";
-const AddListModal = () => {
+const AddListModal = ({editing,listName,id}) => {
     const [openModal, setOpenModal] = useState(false);
-    const [name,setName] = useState("")
-    const {createList} = useListStore()
+    const [name,setName] = useState(editing ? listName: "")
+    const {createList, updateList} = useListStore()
     const {token} = useUserStore()
     function onCloseModal() {
         setOpenModal(false);
@@ -16,13 +16,22 @@ const AddListModal = () => {
 
     const createListButton = async () => {
         if (name.length > 2){
-            await createList(name,token)}
+            if (editing){
+                const data = {name:name,id:id}
+                await updateList(data,token)
+
+            }else{
+
+                await createList(name,token)
+
+            }
+            setName("")
             setOpenModal(false);
-    }
+    }}
 
     return (
         <>
-            <Button color="light" className="cursor:pointer" onClick={() => setOpenModal(true)}><MdFormatListBulletedAdd className="mr-2 text-xl" />Create New List</Button>
+            <Button color="light" className="cursor:pointer" onClick={() => setOpenModal(true)}><MdFormatListBulletedAdd className="mr-2 text-xl" />{editing ? "Update List Name":"Create New List"}</Button>
             <Modal show={openModal} size="sm" className="text-gray-900" onClose={onCloseModal} popup>
                 <ModalHeader />
                 <ModalBody>

@@ -131,7 +131,6 @@ class PollAssignment(db.Model):
 
 class Vote(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    pollee_id = db.Column(db.Integer, db.ForeignKey("pollee.id"), nullable=False)
     poll_id = db.Column(db.Integer, db.ForeignKey("poll.id"), nullable=False)
     choice_id = db.Column(db.Integer, db.ForeignKey("choice.id"), nullable=False)
     unique_constraint = db.UniqueConstraint('pollee_id', 'poll_id', name='one_vote')

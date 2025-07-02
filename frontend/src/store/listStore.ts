@@ -140,6 +140,7 @@ const useListStore = create<ListState>((set) => ({
                 throw new Error(errorData || 'Login failed')
             }
             const updated_list = await res.json()
+
             set((state)=>({isLoading:false, lists: state.lists.map((c)=>
             c.id === updated_list.id ? {...c,...updated_list}:c)}))
 

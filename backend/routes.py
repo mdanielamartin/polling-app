@@ -240,8 +240,11 @@ def add_pollee():
         pollee_schema = PolleeSchema()
         validated_data = pollee_schema.load(data)
     except ValidationError as e:
-        return jsonify({"error": e.messages}), 400
+        return jsonify(e.messages), 400
     try:
+        check_email = Pollee.query.filter_by(email = validated_data["email"], user_id=user_id).first()
+        if check_email:
+            return jsonify("Duplicated contact"), 400
         pollee = Pollee(user_id=user_id, email = validated_data["email"])
         db.session.add(pollee)
         db.session.commit()
@@ -256,7 +259,6 @@ def delete_pollee():
     auth = check_user(user_id)
     if not auth:
         return jsonify("User not found"), 404
-
     try:
         data = request.get_json()
         if not isinstance(data, list) or not all(isinstance(id, int) for id in data):
@@ -305,9 +307,9 @@ def update_pollee():
             if hasattr(pollee,key):
                 setattr(pollee,key,value)
         db.session.commit()
-        return jsonify({"id":pollee.id}), 200
+        return jsonify(pollee.serialize()), 200
     except Exception as e:
-        return jsonify({"error":str(e)}), 500
+        return jsonify(str(e)), 500
 
 @api_blueprint.route("/pollees", methods=["GET"])
 @jwt_required()

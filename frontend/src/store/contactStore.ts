@@ -93,7 +93,7 @@ const useContactStore = create<ContactState>((set) => ({
     deleteContacts: async (contact_ids: number[], token: string) => {
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}pollee/delete}`, {
+            const res = await fetch(`${backendURL}pollee/delete`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(contact_ids),
@@ -114,8 +114,6 @@ const useContactStore = create<ContactState>((set) => ({
             let message = 'Unexpected error'
             if (err instanceof Error) {
                 message = err.message
-            } else if (typeof err === 'object' && err !== null && 'error' in err) {
-                message = (err as ErrorResponse).error
             }
             set({ error: message, isLoading: false })
         }
