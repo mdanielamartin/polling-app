@@ -6,10 +6,7 @@ import { FaClipboardList } from "react-icons/fa";
 import useUserStore from "../src/store/userStore";
 import useListStore from "../src/store/listStore";
 
- type contactListProp = {
-    contactIds: number[]
- }
-const ListSelectionModal = ({contactIds}: contactListProp) => {
+const ListSelectionModal = ({contactIds, onActionComplete}) => {
 
 
     const {token} = useUserStore()
@@ -23,6 +20,7 @@ const ListSelectionModal = ({contactIds}: contactListProp) => {
     const addButton = async () =>{
         await addToList(contactIds,selectList , token)
         setSelectList(null)
+        onActionComplete()
         setOpenModal(false)
     }
 

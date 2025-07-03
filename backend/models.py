@@ -115,7 +115,7 @@ class PollAssignment(db.Model):
     pollee_id = db.Column(db.Integer, db.ForeignKey('pollee.id'), nullable=False)
 
     poll = db.relationship("Poll", back_populates="assignments")
-    pollee = db.relationship("Pollee", back_populates = "assignments")
+    pollee = db.relationship("Pollee", back_populates = "assignments", lazy="joined")
 
     __table_args__ = (db.UniqueConstraint('poll_id', 'pollee_id', name='unique_assignment'),)
 

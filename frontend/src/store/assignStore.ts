@@ -44,7 +44,7 @@ const useAssignStore = create<AssigmentState>((set) => ({
 
             const data = await res.json()
             const assigned = data.assigned
-            set((state) => ({isLoading: false, assignments: [...state.assignments,assigned]}))
+            set((state) => ({isLoading: false, assignments: [...state.assignments,...assigned]}))
         } catch (err: unknown) {
             let message = 'Unexpected error'
             if (err instanceof Error) {
@@ -59,7 +59,7 @@ const useAssignStore = create<AssigmentState>((set) => ({
     removeAssignments: async (contactIds: number[], token: string, pollId: number) => {
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}pollee/assignment/${pollId}}`, {
+            const res = await fetch(`${backendURL}pollee/assignment/${pollId}`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(contactIds),

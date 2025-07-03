@@ -331,16 +331,16 @@ def assign_pollee(poll_id):
     user_id = get_jwt_identity()
     auth = check_user(user_id)
     if not auth:
-        return jsonify({"error": "User not found"}), 404
+        return jsonify("User not found"), 404
 
     try:
         data = request.get_json()
         if not isinstance(data, list) or not all(isinstance(id, int) for id in data):
-            return jsonify({"error": "Expected a list of IDs"}), 400
+            return jsonify("Expected a list of IDs"), 400
 
         poll = Poll.query.get(poll_id)
         if not poll or str(poll.user_id) != user_id:
-            return jsonify({"error": "Unauthorized access"}), 401
+            return jsonify("Unauthorized access"), 401
 
         added = []
         skipped = []
@@ -352,10 +352,11 @@ def assign_pollee(poll_id):
                 continue
             assignment = PollAssignment(poll_id=poll_id, pollee_id=id)
             db.session.add(assignment)
+            db.session.flush()
+            db.session.refresh(assignment)
             added.append(assignment.serialize())
 
         db.session.commit()
-
         return jsonify({
             "message": "Assignment process completed",
             "assigned": added,
@@ -363,26 +364,26 @@ def assign_pollee(poll_id):
         }), 200
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify(str(e)), 500
 
 @api_blueprint.route("/pollee/assignment/<int:poll_id>", methods=["DELETE"])
 @jwt_required()
-def delete_assignments():
+def delete_assignments(poll_id):
     user_id = get_jwt_identity()
     auth = check_user(user_id)
     if not auth:
-        return jsonify({"error": "User not found"}), 404
+        return jsonify("User not found"), 404
 
     try:
         data = request.get_json()
         if not isinstance(data, list) or not all(isinstance(id, int) for id in data):
-            return jsonify({"error": "Expected a list of IDs"}), 400
+            return jsonify("Expected a list of IDs"), 400
 
         deleted_ids = []
         not_found_ids = []
 
         for id in data:
-            assignment = PollAssignment.query.filter_by(id=id, user_id=user_id).first()
+            assignment = PollAssignment.query.filter_by(id=id, poll_id=poll_id).first()
             if assignment:
                 db.session.delete(assignment)
                 deleted_ids.append(id)
@@ -398,7 +399,7 @@ def delete_assignments():
         }), 200
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify(str(e)), 500
 
 @api_blueprint.route("/pollee/assignment/<int:poll_id>", methods=["GET"])
 @jwt_required()
