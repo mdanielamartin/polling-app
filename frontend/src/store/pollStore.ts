@@ -10,9 +10,9 @@ interface PollState {
     poll: Poll;
     polls: Poll[];
     activation: boolean;
-    createPoll: (data:PollData, token:string) => Promise<void>;
+    createPoll: (data:PollCreate, token:string) => Promise<boolean>;
     updatePoll: (data:PollData, token:string) => Promise<void>;
-    deletePoll: (data:PollData, token:string) => Promise<void>;
+    deletePoll: (id:number, token:string) => Promise<void>;
     getPolls: (token:string) => Promise<void>;
     getPoll: (data:number, token:string) => Promise<void>;
     clearError: () => void;
@@ -36,6 +36,12 @@ interface PollData {
   description: string | null;
 }
 
+interface PollCreate {
+  name: string | null;
+  time_limit_days: number | null;
+  description: string | null;
+}
+
 type ErrorResponse = { error: string }
 
 const usePollStore = create<PollState>((set) => ({
@@ -45,7 +51,7 @@ const usePollStore = create<PollState>((set) => ({
     activation: false,
     poll: {name:null,id: null,user_id: null,created_at: null,publish_date:  null, closing_date:  null,time_limit_days: null,status: null,description:null},
 
-    createPoll: async (data: PollData, token: string) => {
+    createPoll: async (data: PollCreate, token: string) => {
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}poll/create`, {
@@ -61,6 +67,7 @@ const usePollStore = create<PollState>((set) => ({
 
             const poll = await res.json()
             set({ isLoading: false, poll: poll})
+            return true
 
         } catch (err: unknown) {
             let message = 'Unexpected error'
@@ -70,6 +77,7 @@ const usePollStore = create<PollState>((set) => ({
                 message = (err as ErrorResponse).error
             }
             set({ error: message, isLoading: false })
+            return false
         }
     },
 
@@ -102,10 +110,10 @@ const usePollStore = create<PollState>((set) => ({
         }
     },
 
-    deletePoll: async (data: PollData, token: string) => {
+    deletePoll: async (pollId:number, token: string) => {
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}poll/delete/${data.id}`, {
+            const res = await fetch(`${backendURL}poll/delete/${pollId}`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             })
@@ -114,12 +122,12 @@ const usePollStore = create<PollState>((set) => ({
                 const errorData = await res.json()
                 throw new Error(errorData || 'Login failed')
             }
+         set((state)=>({isLoading:false, polls: state.polls.filter((c)=>
+            c.id !== pollId)}))
         } catch (err: unknown) {
             let message = 'Unexpected error'
             if (err instanceof Error) {
                 message = err.message
-            } else if (typeof err === 'object' && err !== null && 'error' in err) {
-                message = (err as ErrorResponse).error
             }
             set({ error: message, isLoading: false })
         }
@@ -163,7 +171,8 @@ const usePollStore = create<PollState>((set) => ({
                 throw new Error(errorData || 'Login failed')
             }
             const poll = await res.json()
-            set({ isLoading: false, poll: poll })
+            const {choices, ...info} = poll
+            set({ isLoading: false, poll: info })
         } catch (err: unknown) {
             let message = 'Unexpected error'
             if (err instanceof Error) {

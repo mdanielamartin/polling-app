@@ -8,7 +8,7 @@ interface ListState {
     error: string | null;
     isLoading: boolean;
     lists: List[];
-    createList: (data:ListData, token:string) => Promise<void>;
+    createList: (data:string, token:string) => Promise<void>;
     updateList: (data:ListData,token:string) => Promise<void>;
     deleteList: (listId:number, token:string) => Promise<void>;
     addToList: (data:number[],listId:number, token:string) => Promise<void>;
@@ -42,13 +42,14 @@ const useListStore = create<ListState>((set) => ({
     isLoading: false,
     lists: [],
 
-    createList: async (data: ListData, token: string) => {
+    createList: async (data: string, token: string) => {
         set({ isLoading: true, error: null })
+        const listName = {"name":data}
         try {
             const res = await fetch(`${backendURL}list/create`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                body: JSON.stringify(data),
+                body: JSON.stringify(listName),
             })
             if (!res.ok) {
                 const errorData = await res.json()
@@ -139,6 +140,7 @@ const useListStore = create<ListState>((set) => ({
                 throw new Error(errorData || 'Login failed')
             }
             const updated_list = await res.json()
+
             set((state)=>({isLoading:false, lists: state.lists.map((c)=>
             c.id === updated_list.id ? {...c,...updated_list}:c)}))
 

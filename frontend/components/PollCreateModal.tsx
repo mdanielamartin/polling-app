@@ -3,42 +3,58 @@
 import { useForm } from "react-hook-form";
 import * as yup from "yup"
 import { yupResolver } from "@hookform/resolvers/yup";
-
+import usePollStore from "../src/store/pollStore";
+import useUserStore from "../src/store/userStore";
 import { Button, Label, Modal, ModalBody, ModalHeader, TextInput, Dropdown, DropdownItem, Textarea, ModalFooter } from "flowbite-react";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { showPollError } from "../utils/alerts";
 
 const PollCreateModal = () => {
-    const [openModal, setOpenModal] = useState(true);
+    const [openModal, setOpenModal] = useState(false);
     const [selectedDay,setSelectedDay] = useState(0)
     const days = [...Array(30)].map((_, i) => i + 1)
+
+    const router = useRouter()
+    const {createPoll, error, poll} = usePollStore()
+    const {token} = useUserStore()
+
     function onCloseModal() {
-        reset({"name":"","duration":null,"description":""})
+        reset({"name":"","time_limit_days":null,"description":""})
         setSelectedDay(null)
         setOpenModal(false);
     }
 
     const pollSchema = yup.object().shape({
-
         name: yup.string().min(3, "Name must be at least 3 characters long").max(50, "Name must not exceed 50 characters").required("Poll must have a name/question or instruction"),
-        duration: yup.number().min(1, "Polls minimum duration is 1 day").max(30, "Polls maximum duration is 30 days").required("Please specify the poll's duration"),
+        time_limit_days: yup.number().min(1, "Polls minimum duration is 1 day").max(30, "Polls maximum duration is 30 days").required("Please specify the poll's duration"),
         description: yup.string().max(255, "Description cannot exceed 255 characters.")
     })
 
     interface FormData {
         name: string;
-        duration: number;
+        time_limit_days: number;
         description: string;
     }
 
     const { register, setValue,reset, handleSubmit, formState: { errors } } = useForm({ resolver: yupResolver(pollSchema) })
 
-    const onSubmit = (data: FormData) => {
-        console.log("Form Data:", data);
-    };
+      const onSubmit = async (data: FormData) => {
+        await createPoll(data, token)
+    }
+
+    useEffect(()=>{
+    if (error){
+          showPollError(error)
+        }
+    if (poll.id){
+            router.push(`dashboard/edit/poll/${poll.id}`)
+        }
+    },[error,poll,router])
 
     useEffect(()=>{
         if( selectedDay !== null){
-            setValue("duration",selectedDay)
+            setValue("time_limit_days",selectedDay)
         }
 
     },[selectedDay,setValue])
@@ -61,9 +77,9 @@ const PollCreateModal = () => {
                                 </div>
                                 <div className="sm:col-start-3">
                                     <div className="mb-2 block">
-                                        <Label className="text-md" htmlFor="duration">Poll Validity in Days</Label>
+                                        <Label className="text-md" htmlFor="time_limit_days">Poll Validity in Days</Label>
                                     </div>
-                                    <Dropdown id="duration" color="alternative" label={selectedDay ? selectedDay : "Duration"} className="max-h-48 overflow-y-auto w-full" dismissOnClick={true}>
+                                    <Dropdown id="time_limit_days" color="alternative" label={selectedDay ? selectedDay : "time_limit_days"} className="max-h-48 overflow-y-auto w-full" dismissOnClick={true}>
                                         {days.map((day, index) => {
                                             return (
                                                 <DropdownItem className="bg-gray-50 hover:bg-gray-100"
@@ -73,7 +89,7 @@ const PollCreateModal = () => {
                                         })}
 
                                     </Dropdown>
-                                     <p className="text-red-500">{errors.duration?.message}</p>
+                                     <p className="text-red-500">{errors.time_limit_days?.message}</p>
                                 </div>
                                 <div className="sm:col-span-full sm:row-start-2">
                                     <div className="mb-2 block">

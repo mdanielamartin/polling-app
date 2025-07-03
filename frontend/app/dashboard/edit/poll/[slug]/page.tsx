@@ -1,9 +1,25 @@
-
+"use client"
 import { Tabs, TabItem } from "flowbite-react";
 import ChoicesTab from "../../../../../components/ChoicesTab";
 import EditPollTab from "../../../../../components/EditPollTab";
 import AssignmentTab from "../../../../../components/AssignmentTab";
+import { useParams } from 'next/navigation'
+import { useEffect } from "react";
+import usePollStore from "../../../../../src/store/pollStore";
+import useUserStore from "../../../../../src/store/userStore";
+
 const EditPoll = () => {
+    const params = useParams()
+    const slug = Number(params.slug)
+    const {getPoll} = usePollStore()
+    const {token} = useUserStore()
+
+    const onLoad = async ()=>{
+        await getPoll(slug,token)
+    }
+    useEffect(()=>{
+        onLoad()
+    },[])
 
     return (
         <div className="m-3">

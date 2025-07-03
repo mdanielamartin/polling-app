@@ -18,17 +18,17 @@ def add_user():
     try:
         validated_data = user_schema.load(data)
         if User.query.filter_by(email=validated_data['email']).first():
-            return jsonify({"error": "Email already in use."}), 409
+            return jsonify("Email already in use"), 409
     except ValidationError as e:
-        return jsonify({"error": e.messages}), 400
+        return jsonify({e.messages}), 400
     try:
         hashed_password = bcrypt.hashpw(validated_data['password'].encode('utf-8'), bcrypt.gensalt())
         new_user = User(email=validated_data['email'], password=hashed_password.decode('utf-8'))
         db.session.add(new_user)
         db.session.commit()
-        return jsonify({"message": f"User added successfully!"}), 201
+        return jsonify("User added successfully!"), 201
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({str(e)}), 500
 
 @api_blueprint.route("/user/login", methods=["POST"])
 def login_user():
@@ -37,18 +37,18 @@ def login_user():
     try:
         validated_data = user_schema.load(data)
         if not User.query.filter_by(email=validated_data['email']).first():
-            return jsonify({"error": "Account not found, registration required"}), 404
+            return jsonify("Account not found, registration required"), 404
     except ValidationError as e:
-        return jsonify({"error": e.messages}), 400
+        return jsonify({e.messages}), 400
     try:
         user = User.query.filter_by(email=validated_data['email']).first()
         verify_password = bcrypt.checkpw(validated_data['password'].encode('utf-8'), user.password.encode('utf-8'))
         if not verify_password:
-            return jsonify({"error": "Invalid email/password combination"}), 401
+            return jsonify("Invalid email/password combination"), 401
         access_token = create_access_token(identity=str(user.id),additional_claims={"email": user.email}, expires_delta=timedelta(hours=1))
         return jsonify({"access_token": access_token}), 200
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify(str(e)), 500
 
 @api_blueprint.route("/poll/create", methods=["POST"])
 @jwt_required()
@@ -56,20 +56,20 @@ def create_poll():
     user_id = get_jwt_identity()
     auth = check_user(user_id)
     if not auth:
-        return jsonify({"error": "User not found"}), 404
+        return jsonify("User not found"), 404
     try:
         data = request.json
         poll_schema = PollSchema()
         validated_data = poll_schema.load(data)
     except ValidationError as e:
-        return jsonify({"error": e.messages}), 400
+        return jsonify(e.messages), 400
     try:
         poll = Poll(name=validated_data["name"],time_limit_days=validated_data["time_limit_days"], user_id=user_id)
         db.session.add(poll)
         db.session.commit()
-        return jsonify({"id":poll.id}), 200
+        return jsonify(poll.serialize()), 200
     except Exception as e:
-        return jsonify({"error":str(e)}), 500
+        return jsonify(str(e)), 500
 
 
 @api_blueprint.route("/polls", methods=["GET"])
@@ -81,7 +81,7 @@ def get_polls():
         return jsonify({"error": "User not found"}), 404
     try:
         polls = Poll.query.filter_by(user_id=user_id).all()
-        poll_list = [poll.serialize() for poll in polls]
+        poll_list = [poll.poll_information() for poll in polls]
         return jsonify(poll_list), 200
     except Exception as e:
         return jsonify({"error":str(e)}), 500
@@ -92,24 +92,24 @@ def update_poll(id):
     user_id = get_jwt_identity()
     auth = check_user(user_id)
     if not auth:
-        return jsonify({"error": "User not found"}), 404
+        return jsonify("User not found"), 404
     try:
         data = request.json
         poll_schema = PollSchema()
         validated_data = poll_schema.load(data)
     except ValidationError as e:
-        return jsonify({"error": e.messages}), 400
+        return jsonify(e.messages), 400
     try:
         poll = Poll.query.filter_by(id=id,user_id=user_id).first()
         if not poll:
-            return jsonify({"error": "Poll not found"}), 404
+            return jsonify("Poll not found"), 404
         for key,value in validated_data.items():
             if hasattr(poll,key):
                 setattr(poll,key,value)
         db.session.commit()
-        return jsonify({"id":poll.id}), 200
+        return jsonify(poll.serialize()), 200
     except Exception as e:
-        return jsonify({"error":str(e)}), 500
+        return jsonify(str(e)), 500
 
 @api_blueprint.route("/poll/delete/<int:id>", methods=["DELETE"])
 @jwt_required()
@@ -117,16 +117,16 @@ def delete_poll(id):
     user_id = get_jwt_identity()
     auth = check_user(user_id)
     if not auth:
-        return jsonify({"error": "User not found"}), 404
+        return jsonify("User not found"), 404
     try:
         poll = Poll.query.filter_by(id=id,user_id=user_id).first()
         if not poll:
-            return jsonify({"error": "Poll not found"}), 404
+            return jsonify("Poll not found"), 404
         if poll.status == "draft" or poll.status == "completed":
             db.session.delete(poll)
             db.session.commit()
             return jsonify({"message":f"Poll {id} deleted"}), 200
-        return jsonify({"error": "Only unpublished or completed polls can be deleted"}), 400
+        return jsonify("Only drafted or completed polls can be deleted"), 400
     except Exception as e:
         return jsonify({"error":str(e)}), 500
 
@@ -216,16 +216,16 @@ def get_poll(id):
     user_id = get_jwt_identity()
     auth = check_user(user_id)
     if not auth:
-        return jsonify({"error": "User not found"}), 404
+        return jsonify("User not found"), 404
     try:
         poll = Poll.query.filter_by(user_id=user_id, id=id).first()
         if not poll:
-            return jsonify({"error": "Poll not found"}), 404
+            return jsonify("Poll not found"), 404
         poll_data = poll.serialize()
         poll_data["choices"] = [choice.serialize() for choice in poll.choices]
         return jsonify(poll_data), 200
     except Exception as e:
-        return jsonify({"error":str(e)}), 500
+        return jsonify(str(e)), 500
 
 
 @api_blueprint.route("/pollee/add", methods=["POST"])
@@ -234,21 +234,23 @@ def add_pollee():
     user_id = get_jwt_identity()
     auth = check_user(user_id)
     if not auth:
-        return jsonify({"error": "User not found"}), 404
+        return jsonify("User not found"), 404
     try:
         data = request.json
         pollee_schema = PolleeSchema()
         validated_data = pollee_schema.load(data)
-        list_id = data.get("list_id", None)
     except ValidationError as e:
-        return jsonify({"error": e.messages}), 400
+        return jsonify(e.messages), 400
     try:
-        pollee = Pollee(user_id=user_id,list_id = list_id, email = validated_data["email"])
+        check_email = Pollee.query.filter_by(email = validated_data["email"], user_id=user_id).first()
+        if check_email:
+            return jsonify("Duplicated contact"), 400
+        pollee = Pollee(user_id=user_id, email = validated_data["email"])
         db.session.add(pollee)
         db.session.commit()
         return jsonify(pollee.serialize()), 200
     except Exception as e:
-        return jsonify({"error":str(e)}), 500
+        return jsonify(str(e)), 500
 
 @api_blueprint.route("/pollee/delete", methods=["DELETE"])
 @jwt_required()
@@ -256,12 +258,11 @@ def delete_pollee():
     user_id = get_jwt_identity()
     auth = check_user(user_id)
     if not auth:
-        return jsonify({"error": "User not found"}), 404
-
+        return jsonify("User not found"), 404
     try:
         data = request.get_json()
         if not isinstance(data, list) or not all(isinstance(id, int) for id in data):
-            return jsonify({"error": "Expected a list of integers (IDs)"}), 400
+            return jsonify("Expected a list of integers (IDs)"), 400
 
         deleted_ids = []
         not_found_ids = []
@@ -306,9 +307,9 @@ def update_pollee():
             if hasattr(pollee,key):
                 setattr(pollee,key,value)
         db.session.commit()
-        return jsonify({"id":pollee.id}), 200
+        return jsonify(pollee.serialize()), 200
     except Exception as e:
-        return jsonify({"error":str(e)}), 500
+        return jsonify(str(e)), 500
 
 @api_blueprint.route("/pollees", methods=["GET"])
 @jwt_required()
@@ -330,16 +331,16 @@ def assign_pollee(poll_id):
     user_id = get_jwt_identity()
     auth = check_user(user_id)
     if not auth:
-        return jsonify({"error": "User not found"}), 404
+        return jsonify("User not found"), 404
 
     try:
         data = request.get_json()
         if not isinstance(data, list) or not all(isinstance(id, int) for id in data):
-            return jsonify({"error": "Expected a list of IDs"}), 400
+            return jsonify("Expected a list of IDs"), 400
 
         poll = Poll.query.get(poll_id)
         if not poll or str(poll.user_id) != user_id:
-            return jsonify({"error": "Unauthorized access"}), 401
+            return jsonify("Unauthorized access"), 401
 
         added = []
         skipped = []
@@ -347,41 +348,42 @@ def assign_pollee(poll_id):
         for id in data:
             exists = PollAssignment.query.filter_by(poll_id=poll_id, pollee_id=id).first()
             if exists:
-                skipped.append(id)
+                skipped.append(exists.serialize())
                 continue
             assignment = PollAssignment(poll_id=poll_id, pollee_id=id)
             db.session.add(assignment)
-            added.append(id)
+            db.session.flush()
+            db.session.refresh(assignment)
+            added.append(assignment.serialize())
 
         db.session.commit()
-
         return jsonify({
             "message": "Assignment process completed",
-            "assigned_ids": added,
-            "skipped_ids": skipped
+            "assigned": added,
+            "skipped": skipped
         }), 200
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify(str(e)), 500
 
 @api_blueprint.route("/pollee/assignment/<int:poll_id>", methods=["DELETE"])
 @jwt_required()
-def delete_assignments():
+def delete_assignments(poll_id):
     user_id = get_jwt_identity()
     auth = check_user(user_id)
     if not auth:
-        return jsonify({"error": "User not found"}), 404
+        return jsonify("User not found"), 404
 
     try:
         data = request.get_json()
         if not isinstance(data, list) or not all(isinstance(id, int) for id in data):
-            return jsonify({"error": "Expected a list of IDs"}), 400
+            return jsonify("Expected a list of IDs"), 400
 
         deleted_ids = []
         not_found_ids = []
 
         for id in data:
-            assignment = PollAssignment.query.filter_by(id=id, user_id=user_id).first()
+            assignment = PollAssignment.query.filter_by(id=id, poll_id=poll_id).first()
             if assignment:
                 db.session.delete(assignment)
                 deleted_ids.append(id)
@@ -397,7 +399,7 @@ def delete_assignments():
         }), 200
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify(str(e)), 500
 
 @api_blueprint.route("/pollee/assignment/<int:poll_id>", methods=["GET"])
 @jwt_required()
@@ -571,16 +573,16 @@ def delete_list(id):
     user_id = get_jwt_identity()
     auth = check_user(user_id)
     if not auth:
-        return jsonify({"error": "User not found"}), 404
+        return jsonify("User not found"), 404
     try:
         list_obj = List.query.filter_by(id=id, user_id=user_id).first()
         if not list_obj:
-            return jsonify({"error": "List not found"}), 404
+            return jsonify("List not found"), 404
         db.session.delete(list_obj)
         db.session.commit()
-        return jsonify({"message":f"List has been deleted"}), 200
+        return jsonify("List has been deleted"), 200
     except Exception as e:
-        return jsonify({"error":str(e)}), 500
+        return jsonify(str(e)), 500
 
 @api_blueprint.route("/lists", methods=["GET"])
 @jwt_required()
@@ -588,13 +590,13 @@ def get_lists():
     user_id = get_jwt_identity()
     auth = check_user(user_id)
     if not auth:
-        return jsonify({"error": "User not found"}), 404
+        return jsonify("User not found"), 404
     try:
         list_obj = List.query.filter_by(user_id=user_id).all()
         list_data = [elem.serialize() for elem in list_obj]
         return jsonify(list_data), 200
     except Exception as e:
-        return jsonify({"error":str(e)}), 500
+        return jsonify(str(e)), 500
 
 @api_blueprint.route("/list/<int:list_id>/add/pollee", methods=["POST"])
 @jwt_required()
@@ -606,36 +608,37 @@ def add_to_list(list_id):
     try:
         data = request.get_json()
         if not isinstance(data, list) or not all(isinstance(id, int) for id in data):
-            return jsonify({"error": "Expected a list of IDs"}), 400
+            return jsonify("Expected a list of IDs"), 400
         for pollee in data:
             record = db.session.query(list_member).filter_by(pollee_id=pollee,list_id=list_id).first()
             if not record:
                 db.session.execute(list_member.insert().values(
                 pollee_id=pollee,list_id=list_id))
         db.session.commit()
-        updated_list = List.query.get(id=list_id)
+        updated_list = List.query.get(list_id)
         return jsonify(updated_list.serialize()), 200
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify(str(e)), 500
 
 @api_blueprint.route("/list/<int:list_id>/delete/pollee", methods=["DELETE"])
 @jwt_required()
-def delete_from_list():
+def delete_from_list(list_id):
     user_id = get_jwt_identity()
     auth = check_user(user_id)
     if not auth:
-        return jsonify({"error": "User not found"}), 404
+        return jsonify("User not found"), 404
     try:
         data = request.get_json()
         if not isinstance(data, list) or not all(isinstance(id, int) for id in data):
-            return jsonify({"error": "Expected a list of IDs"}), 400
-        for pollee in data:
-            record = db.session.query(list_member).filter_by(pollee_id=pollee,list_id=list_id).first()
-            if not record:
-                db.session.execute(list_member.insert().values(
-                pollee_id=pollee,list_id=list_id))
+            return jsonify("Expected a list of IDs"), 400
+        for id in data:
+           db.session.execute(
+            list_member.delete().where(
+            list_member.c.pollee_id == id,
+            list_member.c.list_id == list_id))
         db.session.commit()
-        updated_list = List.query.get(id=list_id)
+
+        updated_list = List.query.get(list_id)
         return jsonify(updated_list.serialize()), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500

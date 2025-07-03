@@ -3,11 +3,25 @@
 import { Button, DropdownItem, Modal, ModalBody, ModalHeader, Dropdown, ModalFooter } from "flowbite-react";
 import { useState } from "react";
 import { FaClipboardList } from "react-icons/fa";
+import useUserStore from "../src/store/userStore";
+import useListStore from "../src/store/listStore";
 
-const ListSelectionModal = () => {
+const ListSelectionModal = ({contactIds, onActionComplete}) => {
+
+
+    const {token} = useUserStore()
+    const {addToList, lists} = useListStore()
     const [openModal, setOpenModal] = useState(false);
+    const [selectList, setSelectList] = useState<number>(null)
     function onCloseModal() {
         setOpenModal(false);
+    }
+
+    const addButton = async () =>{
+        await addToList(contactIds,selectList , token)
+        setSelectList(null)
+        onActionComplete()
+        setOpenModal(false)
     }
 
     return (
@@ -18,10 +32,10 @@ const ListSelectionModal = () => {
                 <ModalBody>
                     <div className="bg-gray-100 h-auto min-w-95/100 rounded-xl px-4 mx-auto justify-center ">
                         <form className="mx-auto p-4" id="list">
-                            <Dropdown color="light" label="Assign Contact List to Poll" value={4} className="max-h-48 overflow-y-auto mb-4 py-2 mx-auto w-3/4 " dismissOnClick={false}>
-                                <DropdownItem className="bg-gray-50 hover:bg-gray-100"> Friends</DropdownItem>
-                                <DropdownItem className="bg-gray-50 hover:bg-gray-100">Work</DropdownItem>
-                                <DropdownItem className="bg-gray-50 hover:bg-gray-100">Family</DropdownItem>
+                            <Dropdown color="light" label={selectList? selectList:"Select a List"} value={4} className="max-h-48 overflow-y-auto mb-4 py-2 mx-auto w-3/4 " dismissOnClick={false}>
+                                {lists.map((list) => (
+                                    <DropdownItem key={list.id} onClick={() => setSelectList(list.id) }className="bg-gray-50 hover:bg-gray-100">{list.name}</DropdownItem>
+                                ))}
 
                             </Dropdown>
                         </form>
@@ -30,8 +44,8 @@ const ListSelectionModal = () => {
                 </ModalBody>
                 <ModalFooter className="-mt-5">
                     <div className="flex justify-center space-x-4 w-full">
-                        <Button color="red" className="shadow-lg hover:shadow-xl">Cancel</Button>
-                        <Button color="cyan" className="shadow-lg hover:shadow-xl" form="list" type="submit">Add Contacts to List</Button>
+                        <Button color="red" className="shadow-lg hover:shadow-xl" >Cancel</Button>
+                        <Button color="cyan" className="shadow-lg hover:shadow-xl" form="list" onClick={addButton}>Add Contacts to List</Button>
                     </div>
                 </ModalFooter>
             </Modal>

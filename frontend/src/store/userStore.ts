@@ -2,6 +2,8 @@
 import { create } from "zustand";
 
 
+
+
 const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
 
 
@@ -9,16 +11,16 @@ interface UserState {
     token: string | null;
     error: string | null;
     isLoading: boolean;
-    login: (data:loginFormat) => Promise<void>;
-    register: (data:loginFormat) => Promise<void>
+    login: (data:loginFormat) => Promise<boolean>;
+    signup: (data:loginFormat) => Promise<boolean>
     clearError: () => void
     logout: () => void
 }
 type loginFormat = {email:string,password:string}
-type ErrorResponse = { error: string }
+
 
 const useUserStore = create<UserState>((set) => ({
-    token: null,
+    token: typeof window !== 'undefined' ? sessionStorage.getItem('token') : null,
     error: null,
     isLoading: false,
 
@@ -38,14 +40,14 @@ const useUserStore = create<UserState>((set) => ({
             const token = userData.access_token
             sessionStorage.setItem("token", token)
             set({ isLoading: false, token: token })
+            return true
         } catch (err: unknown) {
             let message = 'Unexpected error'
             if (err instanceof Error) {
                 message = err.message
-            } else if (typeof err === 'object' && err !== null && 'error' in err) {
-                message = (err as ErrorResponse).error
             }
             set({ error: message, isLoading: false })
+            return false
         }
     },
     clearError: () => {
@@ -57,7 +59,7 @@ const useUserStore = create<UserState>((set) => ({
         sessionStorage.clear()
     },
 
-    register: async (registerData) => {
+    signup: async (registerData) => {
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}user/register`, {
@@ -71,14 +73,14 @@ const useUserStore = create<UserState>((set) => ({
                 throw new Error(errorData || 'Login failed')
             }
             set({isLoading: false})
+            return true
         } catch (err: unknown) {
             let message = 'Unexpected error'
             if (err instanceof Error) {
                 message = err.message
-            } else if (typeof err === 'object' && err !== null && 'error' in err) {
-                message = (err as ErrorResponse).error
             }
             set({ error: message, isLoading: false })
+            return false
         }
     },
 

@@ -8,7 +8,7 @@ interface AssigmentState {
     isLoading: boolean;
     assignments: Assignment[];
     addAssignments: (ids: number[], token:string, pollId:number) => Promise<void>;
-    deleteAssignments: (ids: number[], token:string, pollId: number) => Promise<void>;
+    removeAssignments: (ids: number[], token:string, pollId: number) => Promise<void>;
     getAssignments: (token:string, pollId:number) => Promise<void>;
     clearError: () => void;
 
@@ -44,7 +44,7 @@ const useAssignStore = create<AssigmentState>((set) => ({
 
             const data = await res.json()
             const assigned = data.assigned
-            set((state) => ({isLoading: false, assignments: [...state.assignments,assigned]}))
+            set((state) => ({isLoading: false, assignments: [...state.assignments,...assigned]}))
         } catch (err: unknown) {
             let message = 'Unexpected error'
             if (err instanceof Error) {
@@ -56,10 +56,10 @@ const useAssignStore = create<AssigmentState>((set) => ({
         }
     },
 
-    deleteAssignments: async (contactIds: number[], token: string, pollId: number) => {
+    removeAssignments: async (contactIds: number[], token: string, pollId: number) => {
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}pollee/assignment/${pollId}}`, {
+            const res = await fetch(`${backendURL}pollee/assignment/${pollId}`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(contactIds),
@@ -73,7 +73,7 @@ const useAssignStore = create<AssigmentState>((set) => ({
             const data = await res.json()
             const deletions = new Set(data.deleted_ids)
 
-            set((state)=>({isLoading:false, contacts: state.assignments.filter((c)=>
+            set((state)=>({isLoading:false, assignments: state.assignments.filter((c)=>
             !deletions.has(c.id) )}))
 
         } catch (err: unknown) {

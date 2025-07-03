@@ -45,17 +45,16 @@ class Poll(db.Model):
             "description":self.description,
             "publish_date": self.publish_date,
             "closing_date": self.closing_date,
-            "time_limit_days": self.time_limit_days
+            "time_limit_days": self.time_limit_days,
+            "choices": [choice.serialize() for choice in self.choices]
         }
+
     def pollee_view(self):
         return {
             "name": self.name,
             "id": self.id,
+            "description":self.description,
             "choices":[choice.serialize() for choice in self.choices]}
-    def get_results(self):
-        return {
-            "votes": [vote.serialize() for vote in self.votes]
-        }
 
 class Choice(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -110,15 +109,13 @@ class List(db.Model):
         }
 
 
-
-
 class PollAssignment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     poll_id = db.Column(db.Integer, db.ForeignKey('poll.id'), nullable=False)
     pollee_id = db.Column(db.Integer, db.ForeignKey('pollee.id'), nullable=False)
 
     poll = db.relationship("Poll", back_populates="assignments")
-    pollee = db.relationship("Pollee", back_populates = "assignments")
+    pollee = db.relationship("Pollee", back_populates = "assignments", lazy="joined")
 
     __table_args__ = (db.UniqueConstraint('poll_id', 'pollee_id', name='unique_assignment'),)
 
@@ -134,7 +131,6 @@ class PollAssignment(db.Model):
 
 class Vote(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    pollee_id = db.Column(db.Integer, db.ForeignKey("pollee.id"), nullable=False)
     poll_id = db.Column(db.Integer, db.ForeignKey("poll.id"), nullable=False)
     choice_id = db.Column(db.Integer, db.ForeignKey("choice.id"), nullable=False)
     unique_constraint = db.UniqueConstraint('pollee_id', 'poll_id', name='one_vote')
