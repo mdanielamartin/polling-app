@@ -6,7 +6,8 @@ from .models import db, User, Poll, Choice, Pollee, PollAssignment, Vote, List, 
 from marshmallow import ValidationError
 from .validation import UserSchema, PollSchema, ChoiceSchema, PolleeSchema, PollAssignmentSchema, VoteSchema, ListSchema
 from .utils import check_user, generate_url, send_token_email
-from datetime import timedelta, timezone, datetime
+from datetime import timedelta, timezone, datetime, time
+from pytz import timezone as tz
 from sqlalchemy import func
 
 api_blueprint = Blueprint("api", __name__)
@@ -78,10 +79,10 @@ def get_polls():
     user_id = get_jwt_identity()
     auth = check_user(user_id)
     if not auth:
-        return jsonify({"error": "User not found"}), 404
+        return jsonify("User not found"), 404
     try:
         polls = Poll.query.filter_by(user_id=user_id).all()
-        poll_list = [poll.poll_information() for poll in polls]
+        poll_list = [poll.serialize() for poll in polls]
         return jsonify(poll_list), 200
     except Exception as e:
         return jsonify({"error":str(e)}), 500
@@ -423,35 +424,39 @@ def activate_poll(id):
     user_id = get_jwt_identity()
     auth = check_user(user_id)
     if not auth:
-        return jsonify({"error": "User not found"}), 404
+        return jsonify("User not found"), 404
     try:
         poll = Poll.query.filter_by(id=id, user_id=user_id).first()
         if not poll:
-            return jsonify({"error": "Poll not found"}), 404
-        if poll.status == 'active':
-            return jsonify({"error": "This poll is already active"}), 400
-        activation_date = datetime.now()
-        closing_date = (activation_date + timedelta(days=poll.time_limit_days))
-        closing_date = datetime(closing_date.year, closing_date.month, closing_date.day, 23, 59, 59)
+            return jsonify("Poll not found"), 404
+        # if poll.status == 'active':
+        #     return jsonify("This poll is already active"), 400
+
+        activation_date = datetime.now(tz("UTC")).replace(hour=0, minute=0, second=0, microsecond=0)
+        closing_date = activation_date + timedelta(days=poll.time_limit_days)
+
 
         poll.status = "active"
         poll.publish_date = activation_date
         poll.closing_date = closing_date
         assignments = PollAssignment.query.filter_by(poll_id=id).all()
         if not assignments:
-            return jsonify({"error": "Poll has not been assigned to a contact"}), 400
+            return jsonify("Poll has not been assigned to a contact"), 400
+        db.session.commit()
         fails = []
         for pollee in assignments:
-            token = generate_url(pollee.pollee_id,id,poll.closing_date)
-            send_result = send_token_email(pollee.pollee.email,token, poll.closing_date,poll.name, pollee.pollee_id)
-            if send_result["pollee_id"]:
-                fails.append(send_result["pollee_id"])
-        db.session.commit()
+            token = generate_url(pollee.pollee_id,id,closing_date)
+            # send_result = send_token_email(pollee.pollee.email,token, closing_date,poll.name, pollee.pollee_id)
+        # if send_result["pollee_id"]:
+            # fails.append(send_result["pollee_id"])
+
         if fails:
-            return {"error":fails}, 400
-        return jsonify({"message":"All emails sent successfully"}), 200
+            return fails, 400
+        return jsonify({"closing_date":closing_date.strftime("%Y-%m-%d %H:%M:%S")
+,"activation_date":activation_date.strftime("%Y-%m-%d %H:%M:%S")
+}), 200
     except Exception as e:
-        return jsonify({"error":str(e)}), 500
+        return jsonify(str(e)), 500
 
 @api_blueprint.route("/pollee/vote", methods=["POST"])
 @jwt_required()
@@ -474,7 +479,7 @@ def vote_pollee():
             return jsonify({"error": "This poll has closed"}), 400
         choice = Choice.query.filter_by(poll_id=poll_id,id=validated_data["choice_id"]).first()
         if choice:
-            vote = Vote(pollee_id = pollee_id,poll_id=poll_id, choice_id=validated_data["choice_id"])
+            vote = Vote(poll_id=poll_id, choice_id=validated_data["choice_id"])
             db.session.add(vote)
             db.session.commit()
             return jsonify(f"Vote has been casted successfully"), 200
@@ -489,21 +494,22 @@ def vote_poll():
     claims = get_jwt()
     pollee_id = claims.get('pollee_id', None)
     if not poll_id or not pollee_id:
-        return jsonify({"error": "Invalid token"}), 401
+        return jsonify("Invalid token"), 401
     try:
         verify_jwt_in_request()
     except ExpiredSignatureError:
-        return jsonify({"error": "This poll has closed"}), 401
+        return jsonify("This poll has closed"), 401
     try:
         assignment = PollAssignment.query.filter_by(poll_id=poll_id,pollee_id=pollee_id).first()
         if not assignment:
-            return jsonify({"error": "You do not have permission to vote"}), 409
+            return jsonify("You do not have permission to vote"), 409
         poll = Poll.query.get(poll_id)
         if poll.status != 'active':
-            return jsonify({"error": "This poll has closed"}), 400
+            return jsonify("This poll has closed"), 400
         return jsonify(poll.pollee_view()), 200
     except Exception as e:
-        return jsonify({"error":str(e)}), 500
+        return jsonify(str(e)), 500
+
 
 
 @api_blueprint.route("/poll/results/<int:id>", methods=["GET"])
@@ -512,13 +518,13 @@ def get_poll_results(id):
     user_id = get_jwt_identity()
     auth = check_user(user_id)
     if not auth:
-        return jsonify({"error": "User not found"}), 404
+        return jsonify("User not found"), 404
     try:
         votes = db.session.query(Vote.choice_id, Choice.name, Choice.description, func.count(Vote.id)).join(Choice, Vote.choice_id == Choice.id).filter(Vote.poll_id == id).group_by(Vote.choice_id, Choice.name, Choice.description).all()
-        result = [{"choice_id":choice_id, "name":name, "description":description, "count":count} for choice_id,name,description,count in votes]
+        result = [{"choice_id":choice_id, "label":name, "description":description, "value":count} for choice_id,name,description,count in votes]
         return jsonify(result), 200
     except Exception as e:
-        return jsonify({"error":str(e)}), 500
+        return jsonify(str(e)), 500
 
 @api_blueprint.route("/list/create", methods=["POST"])
 @jwt_required()

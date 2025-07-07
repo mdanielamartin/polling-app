@@ -2,10 +2,10 @@
 import { Dropdown, DropdownItem, Button, Table, TableHead, TableHeadCell, TableRow, Checkbox, TableBody, TableCell, Tabs, TabItem } from "flowbite-react"
 import { useParams } from "next/navigation"
 import { useEffect, useState } from "react"
-import useAssignStore from "../src/store/assignStore"
-import useContactStore from "../src/store/contactStore"
-import useUserStore from "../src/store/userStore"
-import useListStore from "../src/store/listStore"
+import useAssignStore from "../store/assignStore"
+import useContactStore from "../store/contactStore"
+import useUserStore from "../store/userStore"
+import useListStore from "../store/listStore"
 
 const AssignmentTab = () => {
 

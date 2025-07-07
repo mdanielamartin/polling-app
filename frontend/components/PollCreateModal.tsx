@@ -3,8 +3,8 @@
 import { useForm } from "react-hook-form";
 import * as yup from "yup"
 import { yupResolver } from "@hookform/resolvers/yup";
-import usePollStore from "../src/store/pollStore";
-import useUserStore from "../src/store/userStore";
+import usePollStore from "../store/pollStore";
+import useUserStore from "../store/userStore";
 import { Button, Label, Modal, ModalBody, ModalHeader, TextInput, Dropdown, DropdownItem, Textarea, ModalFooter } from "flowbite-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";

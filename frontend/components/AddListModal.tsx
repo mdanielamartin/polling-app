@@ -2,9 +2,9 @@
 
 import { Button, Label, Modal, ModalBody, ModalHeader, TextInput, ModalFooter } from "flowbite-react";
 import { useState } from "react";
-import useListStore from "../src/store/listStore";
+import useListStore from "../store/listStore";
 import { MdFormatListBulletedAdd } from "react-icons/md";
-import useUserStore from "../src/store/userStore";
+import useUserStore from "../store/userStore";
 const AddListModal = ({editing,listName,id}) => {
     const [openModal, setOpenModal] = useState(false);
     const [name,setName] = useState(editing ? listName: "")

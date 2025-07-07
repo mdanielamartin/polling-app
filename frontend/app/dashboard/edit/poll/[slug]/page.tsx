@@ -5,8 +5,8 @@ import EditPollTab from "../../../../../components/EditPollTab";
 import AssignmentTab from "../../../../../components/AssignmentTab";
 import { useParams } from 'next/navigation'
 import { useEffect } from "react";
-import usePollStore from "../../../../../src/store/pollStore";
-import useUserStore from "../../../../../src/store/userStore";
+import usePollStore from "../../../../../store/pollStore";
+import useUserStore from "../../../../../store/userStore";
 
 const EditPoll = () => {
     const params = useParams()

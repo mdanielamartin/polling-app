@@ -3,8 +3,8 @@
 import { Button, Modal, ModalBody, ModalHeader } from "flowbite-react";
 import React, { useState } from "react";
 import { HiOutlineExclamationCircle } from "react-icons/hi";
-import useUserStore from "../src/store/userStore";
-import useContactStore from "../src/store/contactStore";
+import useUserStore from "../store/userStore";
+import useContactStore from "../store/contactStore";
 
 const ConfirmDeletion = ({message,title, contactIds, onActionComplete}) => {
   const [openModal, setOpenModal] = useState(false);
