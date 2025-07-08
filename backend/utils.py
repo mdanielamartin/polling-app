@@ -48,7 +48,7 @@ def send_token_email(email,token, expiration_date, name, pollee_id):
         return ({"pollee_id":result.json()})
     return  ({"pollee_id":result.json()})
 
-def generate_url(pollee_id,poll_id,expiration_date):
-    expiration_time = expiration_date - datetime.now(tz("UTC"))
+def generate_url(pollee_id,poll_id,closing_date,publish_date):
+    expiration_time = closing_date - publish_date
     access_token = create_access_token(identity=str(poll_id),additional_claims={"pollee_id": pollee_id}, expires_delta=expiration_time)
     return access_token

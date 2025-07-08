@@ -6,8 +6,8 @@ from .models import db, User, Poll, Choice, Pollee, PollAssignment, Vote, List, 
 from marshmallow import ValidationError
 from .validation import UserSchema, PollSchema, ChoiceSchema, PolleeSchema, PollAssignmentSchema, VoteSchema, ListSchema
 from .utils import check_user, generate_url, send_token_email
-from datetime import timedelta, timezone, datetime, time
-from pytz import timezone as tz
+from datetime import timedelta, datetime
+from pytz import timezone, utc
 from sqlalchemy import func
 
 api_blueprint = Blueprint("api", __name__)
@@ -65,7 +65,7 @@ def create_poll():
     except ValidationError as e:
         return jsonify(e.messages), 400
     try:
-        poll = Poll(name=validated_data["name"],time_limit_days=validated_data["time_limit_days"], user_id=user_id)
+        poll = Poll(name=validated_data["name"],time_limit_days=validated_data["time_limit_days"], local_timezone=validated_data["local_timezone"],user_id=user_id)
         db.session.add(poll)
         db.session.commit()
         return jsonify(poll.serialize()), 200
@@ -423,38 +423,48 @@ def get_assignments(poll_id):
 def activate_poll(id):
     user_id = get_jwt_identity()
     auth = check_user(user_id)
+    data = request.json
     if not auth:
         return jsonify("User not found"), 404
     try:
         poll = Poll.query.filter_by(id=id, user_id=user_id).first()
         if not poll:
             return jsonify("Poll not found"), 404
+
+        publish_date_str = data.get("publish_date")
+        user_tz_str = data.get("user_timezone")
+
+        if not publish_date_str or not user_tz_str:
+            return jsonify("Mising date and/or timezone"), 400
+
+        user_timezone = timezone(user_tz_str)
+        local_publish_date = user_timezone.localize(datetime.fromisoformat(publish_date_str))
+        local_closing_date =( local_publish_date + timedelta(days=poll.time_limit_days)).replace(hour=23, minute=59, second=59, microsecond=59)
+
+        utc_publish_date = local_publish_date.astimezone(utc)
+        utc_closing_date = local_closing_date.astimezone(utc)
+
         # if poll.status == 'active':
         #     return jsonify("This poll is already active"), 400
 
-        activation_date = datetime.now(tz("UTC")).replace(hour=0, minute=0, second=0, microsecond=0)
-        closing_date = activation_date + timedelta(days=poll.time_limit_days)
-
-
         poll.status = "active"
-        poll.publish_date = activation_date
-        poll.closing_date = closing_date
+        poll.publish_date = utc_publish_date
+        poll.closing_date = utc_closing_date
+        poll.local_timezone = user_tz_str
         assignments = PollAssignment.query.filter_by(poll_id=id).all()
         if not assignments:
             return jsonify("Poll has not been assigned to a contact"), 400
         db.session.commit()
         fails = []
         for pollee in assignments:
-            token = generate_url(pollee.pollee_id,id,closing_date)
+            token = generate_url(pollee.pollee_id,id,utc_closing_date,utc_publish_date)
             # send_result = send_token_email(pollee.pollee.email,token, closing_date,poll.name, pollee.pollee_id)
         # if send_result["pollee_id"]:
             # fails.append(send_result["pollee_id"])
 
         if fails:
             return fails, 400
-        return jsonify({"closing_date":closing_date.strftime("%Y-%m-%d %H:%M:%S")
-,"activation_date":activation_date.strftime("%Y-%m-%d %H:%M:%S")
-}), 200
+        return jsonify("All emails sent successfully"), 200
     except Exception as e:
         return jsonify(str(e)), 500
 
