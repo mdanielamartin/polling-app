@@ -19,8 +19,8 @@ def check_user(id):
         return False
     return True
 
-def send_token_email(email,token, expiration_date, name, pollee_id):
-    poll_link = f'{FRONTEND_URL}/poll-invitation?token={token}'
+def send_token_email(email,token, expiration_date,timezone, poll_name):
+    poll_link = f'{FRONTEND_URL}/verify/{token}'
     api_key = KEY
     api_secret = SECRET
     mailjet = Client(auth=(api_key, api_secret), version='v3.1')
@@ -28,25 +28,37 @@ def send_token_email(email,token, expiration_date, name, pollee_id):
       'Messages': [
         {
           "From": {
-            "Email": "pilot@mailjet.com",
-            "Name": "Polling App Maria Martin"
+            "Email": "mdaniela.martin@proton.me",
+            "Name": "Polling App"
           },
           "To": [
             {
-              "Email": "mdaniela.martin@proton.me",
-              "Name":"Maria Daniela"
+              "Email": email,
+              "Name":"Test Polling App"
             }
           ],
           "Subject": "Polling Invitation Link",
           "TextPart": f"You have been invited to complete a poll, please click on the following link to cast your vote:",
-          "HTMLPart": f"<div><h1>Pepe</h1><h3>You have been invited to complete a poll.</h3><p>Please use the following link to gain access and cast your vote:'>Launch Poll</a></p><p> The poll will remain active until, closing at 11:59 pm. Remember to cast your vote before this date to ensure your participation.</p><p>If you are unfamiliar with this poll and you were not expecting an access link you can ignore this message.</p></div>"
+          "HTMLPart": f"""
+<div style="font-family: Arial, sans-serif; line-height: 1.6;">
+  <h2 style="color: #333;">{poll_name}</h2>
+  <p>You’ve been invited to participate in a poll. Please click the link below to cast your vote:</p>
+  <p><a href="{poll_link}" style="color: #007BFF; text-decoration: none;">Launch Poll</a></p>
+  <p><strong>Closing time:</strong> {expiration_date.strftime("%a, %d %b %Y %H:%M:%S")} ({timezone})</p>
+  <p>Make sure to cast your vote before the deadline to ensure it’s counted.</p>
+  <hr>
+  <p style="font-size: 0.9em; color: #666;">If you weren’t expecting this invitation, feel free to ignore this message.</p>
+</div>
+"""
+
+
         }
       ]
     }
     result = mailjet.send.create(data=data)
     if result.status_code not in [200,201]:
-        return ({"pollee_id":result.json()})
-    return  ({"pollee_id":result.json()})
+        return (email)
+    return  ("")
 
 def generate_url(pollee_id,poll_id,closing_date,publish_date):
     expiration_time = closing_date - publish_date

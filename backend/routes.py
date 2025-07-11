@@ -65,7 +65,7 @@ def create_poll():
     except ValidationError as e:
         return jsonify(e.messages), 400
     try:
-        poll = Poll(name=validated_data["name"],time_limit_days=validated_data["time_limit_days"], local_timezone=validated_data["local_timezone"],user_id=user_id)
+        poll = Poll(name=validated_data["name"],time_limit_days=validated_data["time_limit_days"],user_id=user_id)
         db.session.add(poll)
         db.session.commit()
         return jsonify(poll.serialize()), 200
@@ -85,7 +85,7 @@ def get_polls():
         poll_list = [poll.serialize() for poll in polls]
         return jsonify(poll_list), 200
     except Exception as e:
-        return jsonify({"error":str(e)}), 500
+        return jsonify(str(e)), 500
 
 @api_blueprint.route("/poll/update/<int:id>", methods=["PUT"])
 @jwt_required()
@@ -431,15 +431,16 @@ def activate_poll(id):
         if not poll:
             return jsonify("Poll not found"), 404
 
-        publish_date_str = data.get("publish_date")
+        publish_date_str = data.get("publish_date") #UTC DATE
         user_tz_str = data.get("user_timezone")
 
         if not publish_date_str or not user_tz_str:
             return jsonify("Mising date and/or timezone"), 400
 
-        user_timezone = timezone(user_tz_str)
-        local_publish_date = user_timezone.localize(datetime.fromisoformat(publish_date_str))
-        local_closing_date =( local_publish_date + timedelta(days=poll.time_limit_days)).replace(hour=23, minute=59, second=59, microsecond=59)
+        user_timezone = timezone(user_tz_str)#LOCAL TIMEZONE
+        publish_date_utc = datetime.fromisoformat(publish_date_str.replace("Z", "+00:00"))#UTC AWARE
+        local_publish_date = publish_date_utc.astimezone(user_timezone)#PUBLISH DATE IN LOCAL TIME
+        local_closing_date =( local_publish_date + timedelta(days=poll.time_limit_days)).replace(hour=23, minute=59, second=59)#FOR EMAIL
 
         utc_publish_date = local_publish_date.astimezone(utc)
         utc_closing_date = local_closing_date.astimezone(utc)
@@ -458,10 +459,9 @@ def activate_poll(id):
         fails = []
         for pollee in assignments:
             token = generate_url(pollee.pollee_id,id,utc_closing_date,utc_publish_date)
-            # send_result = send_token_email(pollee.pollee.email,token, closing_date,poll.name, pollee.pollee_id)
-        # if send_result["pollee_id"]:
-            # fails.append(send_result["pollee_id"])
-
+            send_result = send_token_email(pollee.pollee.email,token,local_closing_date,user_timezone,poll.name)
+            if send_result:
+                fails.append(send_result)
         if fails:
             return fails, 400
         return jsonify("All emails sent successfully"), 200

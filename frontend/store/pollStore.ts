@@ -15,7 +15,7 @@ interface PollState {
     deletePoll: (id:number, token:string) => Promise<void>;
     getPolls: (token:string) => Promise<void>;
     getPoll: (data:number, token:string) => Promise<void>;
-    activatePoll: (data:number, token:string) => Promise<void>;
+    activatePoll: (data:number,date:string, tz:string, token:string) => Promise<void>;
     getResults: (data:number, token:string) => Promise<Result[]>;
     clearError: () => void;
 
@@ -196,12 +196,13 @@ const usePollStore = create<PollState>((set) => ({
         }
     },
 
-    activatePoll: async (pollId:number, token:string) => {
+    activatePoll: async (pollId:number,date:string,tz:string, token:string) => {
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}poll/activate/${pollId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({"publish_date":date, "user_timezone":tz})
             })
 
              if (!res.ok) {

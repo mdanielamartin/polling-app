@@ -3,7 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, Button
 import usePollStore from "../../../store/pollStore";
 import useUserStore from "../../../store/userStore";
 import { useEffect} from "react";
-import { showPollError } from "../../../utils/alerts";
+
 
 const EditPolls = () => {
 
@@ -11,8 +11,10 @@ const {polls, getPolls, deletePoll, error, activatePoll} = usePollStore()
 const token = useUserStore.getState().token
 
 const launchPoll = async (id:number)=>{
-
-  await activatePoll(id,token)
+  const localNow = new Date();
+  const utcNow = localNow.toISOString()
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+  await activatePoll(id,utcNow,timezone,token)
 }
 
 useEffect(()=>{

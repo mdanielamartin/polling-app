@@ -62,13 +62,3 @@ export const showRegistrationError = (message: string): void => {
       confirmButtonText: 'Close',
     });
   };
-
-      export const voteSuccess = (): void => {
-    Swal.fire({
-      icon: "success",
-      title: 'Your vote has been sent!',
-      text: "All done! The information has been sent to the poll administrator. Remember you may only vote once per poll, and all responses are anonymous. ",
-      confirmButtonColor: ' #FF6C40',
-      confirmButtonText: 'Ok!',
-    });
-  };
