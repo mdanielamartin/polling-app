@@ -4,7 +4,7 @@ import { useForm } from "react-hook-form";
 import { useRouter } from 'next/navigation'
 import * as yup from "yup"
 import { yupResolver } from "@hookform/resolvers/yup";
-import useUserStore from "../../src/store/userStore";
+import useUserStore from "../../store/userStore";
 import { showLoginError } from "../../utils/alerts";
 import { useEffect } from "react";
 

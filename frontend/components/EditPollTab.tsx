@@ -4,8 +4,8 @@ import * as yup from "yup"
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Label, Dropdown, DropdownItem, TextInput, Textarea, Button } from "flowbite-react"
 import { useState, useEffect} from "react"
-import usePollStore from "../src/store/pollStore";
-import useUserStore from "../src/store/userStore";
+import usePollStore from "../store/pollStore";
+import useUserStore from "../store/userStore";
 
 
 const EditPollTab = () => {

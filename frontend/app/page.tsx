@@ -1,6 +1,6 @@
 'use client'
 
-import usePollStore from "../src/store/pollStore";
+import usePollStore from "../store/pollStore";
 import { Button } from "flowbite-react";
 import { Accordion, AccordionContent, AccordionPanel, AccordionTitle } from "flowbite-react";
 

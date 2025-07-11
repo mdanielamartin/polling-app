@@ -1,14 +1,21 @@
 "use client"
 import { Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, Button, ButtonGroup} from "flowbite-react";
-import usePollStore from "../../../src/store/pollStore";
-import useUserStore from "../../../src/store/userStore";
+import usePollStore from "../../../store/pollStore";
+import useUserStore from "../../../store/userStore";
 import { useEffect} from "react";
-import { showPollError } from "../../../utils/alerts";
+
 
 const EditPolls = () => {
 
-const {polls, getPolls, deletePoll, error} = usePollStore()
+const {polls, getPolls, deletePoll, error, activatePoll} = usePollStore()
 const token = useUserStore.getState().token
+
+const launchPoll = async (id:number)=>{
+  const localNow = new Date();
+  const utcNow = localNow.toISOString()
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+  await activatePoll(id,utcNow,timezone,token)
+}
 
 useEffect(()=>{
   const onLoad = async() => {
@@ -16,10 +23,7 @@ useEffect(()=>{
   }
   onLoad()
 
-  if (error){
-    showPollError(error)
-  }
-},[error])
+},[])
 
 return (
     <div className="flex min-h-screen w-full justify-center m-2">
@@ -44,7 +48,7 @@ return (
             <TableCell className="text-center text-dark">{poll.time_limit_days}</TableCell>
             <TableCell className="text-center">    <ButtonGroup>
             <Button color="red" onClick={async ()=>{await deletePoll(poll.id,token)}}>Delete</Button>
-            <Button color="alternative">Launch</Button>
+            <Button color="alternative" onClick={()=>launchPoll(poll.id)}>Launch</Button>
             <Button color="alternative">Edit</Button>
     </ButtonGroup></TableCell>
           </TableRow>

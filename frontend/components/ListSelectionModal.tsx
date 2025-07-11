@@ -3,8 +3,8 @@
 import { Button, DropdownItem, Modal, ModalBody, ModalHeader, Dropdown, ModalFooter } from "flowbite-react";
 import { useState } from "react";
 import { FaClipboardList } from "react-icons/fa";
-import useUserStore from "../src/store/userStore";
-import useListStore from "../src/store/listStore";
+import useUserStore from "../store/userStore";
+import useListStore from "../store/listStore";
 
 const ListSelectionModal = ({contactIds, onActionComplete}) => {
 

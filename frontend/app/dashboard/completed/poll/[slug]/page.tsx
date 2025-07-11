@@ -1,23 +1,62 @@
 "use client"
 import { PieChart } from "@mui/x-charts/PieChart"
 import { Accordion, AccordionContent, AccordionTitle, AccordionPanel, List, ListItem } from 'flowbite-react';
+import {useState,useEffect, useMemo} from "react"
+import usePollStore from "../../../../../store/pollStore";
+import useUserStore from "../../../../../store/userStore";
+import { useParams } from "next/navigation";
 
-const results = [
-  { id: 0,label:"Burger King", value: 1, color: '#0088FE' },
-  { id: 1,label:"La Pastora", value: 3, color: '#00C49F' },
-  { id: 2,label:"Pollo Sabroso", value: 2, color: '#FFBB28' },
-  { id: 3,label:"Migos", value: 5, color: '#FF8042' },
-];
 
-const orderedResults = [...results].sort((a, b) => b.value - a.value)
-const Results = () => (
-  <div className='p-4 lg:p-8 min-h-screen flex items-center justify-center'>
+
+const Results = () => {
+
+
+  const { token } = useUserStore()
+  const params = useParams()
+  const slug = Number(params.slug)
+  const {getResults} = usePollStore()
+  const [result,setResult] = useState([])
+
+
+  useEffect(()=>{
+
+    const onLoad = async()=>{
+      const data= await getResults(slug,token)
+      setResult(data)
+    }
+    onLoad()
+  },[getResults,token,slug])
+
+   const sumTotal = useMemo(()=>{
+    if (!result){
+      return 0
+    }
+
+    return result.reduce((acc,choice)=>{return acc + choice.value},0)
+
+  },[result])
+
+  const orderedResult = useMemo(()=>{
+    if (!result){
+      return []
+    }
+
+    return [...result].sort((a, b) => b.value - a.value)
+
+  },[result])
+
+
+  if (!result) {
+    return <div className="text-center text-lg py-8">Loading results...</div>;
+  }
+
+ return ( <div className='p-4 lg:p-8 min-h-screen flex items-center justify-center'>
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-center h-auto">
       <div className='w-full flex items-start justify-center'>
         <PieChart
           series={[
             {
-              data: results,
+              data: result,
             },
           ]}
           width={250}
@@ -31,9 +70,11 @@ const Results = () => (
               <AccordionTitle className='font-bold text-xl'>Results</AccordionTitle>
               <AccordionContent>
                 <List ordered>
-                  {orderedResults.map((choice, index) => {
+                  {orderedResult?.map((choice, index) => {
                     return (
-                      <ListItem className='text-lg' key={index}>{choice.label}</ListItem>
+                      <ListItem className='text-lg' key={index}>
+
+                        {`${choice.label} (${choice.value})`}</ListItem>
                     )
                   })}
                 </List>
@@ -41,13 +82,13 @@ const Results = () => (
             </AccordionPanel>
           </Accordion></div>
 
-
+                  <h3>{`Total Votes: ${sumTotal}`}</h3>
       </div>
     </div>
 
 
-  </div>
-)
+  </div>)
+}
 
 
 

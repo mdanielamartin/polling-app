@@ -27,8 +27,7 @@ class Poll(db.Model):
     status = db.Column(db.String(20), nullable=False, default="draft")
     publish_date=db.Column(db.DateTime, nullable=True)
     closing_date = db.Column(db.DateTime, nullable=True)
-    time_limit_days = db.Column(db.Integer, default=30)
-
+    time_limit_days = db.Column(db.Integer, default=30, nullable=False)
     user = db.relationship("User",back_populates = "polls")
     choices = db.relationship("Choice", back_populates="poll", cascade="all, delete-orphan")
     assignments = db.relationship("PollAssignment", back_populates="poll", cascade="all, delete-orphan")

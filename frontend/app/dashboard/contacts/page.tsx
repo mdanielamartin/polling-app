@@ -7,9 +7,9 @@ import AddListModal from "../../../components/AddListModal";
 import ListSelectionModal from "../../../components/ListSelectionModal";
 import ConfirmDeletion from "../../../components/ConfirmDeletion";
 import { useForm } from "react-hook-form";
-import useUserStore from "../../../src/store/userStore";
-import useContactStore from "../../../src/store/contactStore";
-import useListStore from "../../../src/store/listStore";
+import useUserStore from "../../../store/userStore";
+import useContactStore from "../../../store/contactStore";
+import useListStore from "../../../store/listStore";
 import * as yup from "yup"
 import { yupResolver } from "@hookform/resolvers/yup";
 const Contacts = () => {

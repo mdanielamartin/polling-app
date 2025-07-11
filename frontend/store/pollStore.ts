@@ -15,6 +15,8 @@ interface PollState {
     deletePoll: (id:number, token:string) => Promise<void>;
     getPolls: (token:string) => Promise<void>;
     getPoll: (data:number, token:string) => Promise<void>;
+    activatePoll: (data:number,date:string, tz:string, token:string) => Promise<void>;
+    getResults: (data:number, token:string) => Promise<Result[]>;
     clearError: () => void;
 
 }
@@ -41,6 +43,16 @@ interface PollCreate {
   time_limit_days: number | null;
   description: string | null;
 }
+
+interface Result {
+    choice_id: number;
+    label: string;
+    description: string;
+    value: number;
+
+}
+
+
 
 type ErrorResponse = { error: string }
 
@@ -184,12 +196,13 @@ const usePollStore = create<PollState>((set) => ({
         }
     },
 
-    activatePoll: async (pollId:number, token:string) => {
+    activatePoll: async (pollId:number,date:string,tz:string, token:string) => {
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}poll/${pollId}`, {
+            const res = await fetch(`${backendURL}poll/activate/${pollId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                body: JSON.stringify({"publish_date":date, "user_timezone":tz})
             })
 
              if (!res.ok) {
@@ -197,22 +210,45 @@ const usePollStore = create<PollState>((set) => ({
                 let errorMessage = "Activation failed";
                 if (typeof errorData === "string") {
                     errorMessage = errorData;}
-                else if (typeof errorData === "object" && errorData !== null && "error" in errorData) {
-                    if (Array.isArray(errorData.error)) {
-                    errorMessage = `Failed to send emails: ${errorData.error.join(", ")}`;
-                    } else {
-                    errorMessage = errorData.error;
-                }}
-
+                else if (Array.isArray(errorData)) {
+                    errorMessage = `Failed to send emails: ${errorData.join(", ")}`;
+                   }
                 throw new Error(errorMessage);
             }
-            set({ isLoading: false, activation: true })
+            set({ isLoading: false, activation: true})
         } catch (err: unknown) {
             set({ error: err instanceof Error ? err.message : "Unexpected error", isLoading: false });
 
         }
 
 
+    },
+
+
+         getResults: async ( pollId:number, token: string) => {
+        set({ isLoading: true, error: null })
+        try {
+            const res = await fetch(`${backendURL}poll/results/${pollId}`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            })
+
+            if (!res.ok) {
+                const errorData = await res.json()
+                throw new Error(errorData || 'Login failed')
+            }
+            const results = await res.json()
+            set({ isLoading: false})
+            return results
+        } catch (err: unknown) {
+            let message = 'Unexpected error'
+            if (err instanceof Error) {
+                message = err.message
+            } else if (typeof err === 'object' && err !== null && 'error' in err) {
+                message = (err as ErrorResponse).error
+            }
+            set({ error: message, isLoading: false })
+        }
     },
 
 

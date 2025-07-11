@@ -1,9 +1,31 @@
 
+"use client"
 import { Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, Button } from "flowbite-react";
+import usePollStore from "../../../store/pollStore";
+import useUserStore from "../../../store/userStore";
+import { useEffect, useMemo} from "react";
 
 const CompletePolls = () => {
+    const {getPolls,polls} = usePollStore()
+    const token = useUserStore.getState().token
+    useEffect(()=>{
+      const onLoad = async() => {
+        await getPolls(token)
+      }
+      onLoad()
+
+    },[getPolls,token])
+
+    const completePolls = useMemo(()=>{
+        if (polls){
+
+            return polls
+        }
+
+        return []
 
 
+    },[polls])
     return (
         <div className="flex min-h-screen w-full justify-center m-2">
             <div className="overflow-x-auto min-w-8/10 max-w-9/10">
@@ -21,19 +43,26 @@ const CompletePolls = () => {
                         </TableRow>
                     </TableHead>
                     <TableBody className="divide-y">
-                        <TableRow className="bg-white hover:bg-gray-100">
-                            <TableCell className="whitespace-nowrap font-normal text-md text-center font-medium text-black ">
-                                Birthday Party Places
-                            </TableCell>
-                            <TableCell className="text-center text-dark">June 16, 2025</TableCell>
-                            <TableCell className="text-center text-dark">3 days</TableCell>
-                            <TableCell className="text-center text-dark">June 18, 2025</TableCell>
-                            <TableCell className="text-center text-dark">June 21, 2025</TableCell>
-                            <TableCell className="text-center">
 
+
+                        {completePolls?.map((poll)=>(
+
+                        <TableRow key={poll.id} className="bg-white hover:bg-gray-100">
+                            <TableCell className="whitespace-nowrap font-normal text-md text-center font-medium text-black ">
+                                {poll.name}
+                            </TableCell>
+                            <TableCell className="text-center text-dark">{poll.created_at}</TableCell>
+                            <TableCell className="text-center text-dark">{poll.time_limit_days}</TableCell>
+                            <TableCell className="text-center text-dark">{poll.publish_date}</TableCell>
+                            <TableCell className="text-center text-dark">{poll.closing_date}</TableCell>
+                            <TableCell className="text-center">
                                 <Button color="alternative">View Results</Button>
                             </TableCell>
                         </TableRow>
+
+
+
+                        ))}
                     </TableBody>
                 </Table>
 

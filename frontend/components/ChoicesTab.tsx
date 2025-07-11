@@ -6,8 +6,8 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup"
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useState, useEffect } from "react";
-import useChoiceStore from "../src/store/choiceStore";
-import useUserStore from "../src/store/userStore";
+import useChoiceStore from "../store/choiceStore";
+import useUserStore from "../store/userStore";
 import { useParams } from "next/navigation";
 
 const ChoicesTab = () => {
