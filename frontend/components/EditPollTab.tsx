@@ -66,7 +66,7 @@ const EditPollTab = () => {
                         <div className="mb-2 block">
                             <Label className="text-md" htmlFor="name">Poll Validity in Days</Label>
                         </div>
-                        <Dropdown color="alternative" label={selectedDay ? selectedDay : "Duration"} className="max-h-48 overflow-y-auto w-full" dismissOnClick={true}>
+                        <Dropdown color="alternative" label={selectedDay ? selectedDay : "Duration"} className="max-h-40 max-w-30 overflow-y-auto w-full" dismissOnClick={true} placement="bottom">
                             {days.map((day, index) => {
                                 return (
                                     <DropdownItem onClick={() => setSelectedDay(day)} className="bg-gray-50 hover:bg-gray-100" key={index}>{day}</DropdownItem>
