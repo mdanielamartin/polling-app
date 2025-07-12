@@ -50,44 +50,40 @@ const Results = () => {
     return <div className="text-center text-lg py-8">Loading results...</div>;
   }
 
- return ( <div className='p-4 lg:p-8 min-h-screen flex items-center justify-center'>
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-center h-auto">
-      <div className='w-full flex items-start justify-center'>
-        <PieChart
-          series={[
-            {
-              data: result,
-            },
-          ]}
-          width={250}
-          height={250}
-        />
-      </div>
-      <div className='w-full max-w-lg mx-auto my-4' >
-        <div className='min-w-4/5'>
-          <Accordion className='w-full mx-auto'>
-            <AccordionPanel>
-              <AccordionTitle className='font-bold text-xl'>Results</AccordionTitle>
-              <AccordionContent>
-                <List ordered>
-                  {orderedResult?.map((choice, index) => {
-                    return (
-                      <ListItem className='text-lg' key={index}>
+ return ( <div className="p-4 lg:p-8 min-h-screen flex items-center justify-center">
+  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center w-full max-w-screen-xl">
+  <div className="w-full flex justify-center">
+  <div className="w-64 sm:w-64 lg:w-80">
+    <PieChart
+      series={[{ data: result }]}
+      width={320}
+      height={320}
+    />
+  </div>
+</div>
 
-                        {`${choice.label} (${choice.value})`}</ListItem>
-                    )
-                  })}
-                </List>
-              </AccordionContent>
-            </AccordionPanel>
-          </Accordion></div>
 
-                  <h3>{`Total Votes: ${sumTotal}`}</h3>
-      </div>
+
+    {/* Results Section */}
+    <div className="w-full max-w-lg mx-auto my-4">
+      <Accordion className="w-full">
+        <AccordionPanel>
+          <AccordionTitle className="font-bold text-xl">Results</AccordionTitle>
+          <AccordionContent>
+            <List ordered>
+              {orderedResult?.map((choice, index) => (
+                <ListItem className="text-lg" key={index}>
+                  {`${choice.label} (${choice.value})`}
+                </ListItem>
+              ))}
+            </List>
+          </AccordionContent>
+        </AccordionPanel>
+      </Accordion>
+      <h3 className="mt-4 text-center font-medium text-base">{`Total Votes: ${sumTotal}`}</h3>
     </div>
-
-
-  </div>)
+  </div>
+</div>)
 }
 
 

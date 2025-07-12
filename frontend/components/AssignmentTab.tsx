@@ -6,6 +6,7 @@ import useAssignStore from "../store/assignStore"
 import useContactStore from "../store/contactStore"
 import useUserStore from "../store/userStore"
 import useListStore from "../store/listStore"
+import usePollStore from "../store/pollStore"
 
 const AssignmentTab = () => {
 
@@ -20,8 +21,14 @@ const AssignmentTab = () => {
     const {getContacts, contacts} = useContactStore()
     const {getAssignments, assignments, addAssignments, removeAssignments} = useAssignStore()
     const {getLists,lists} = useListStore()
+    const {activatePoll} = usePollStore()
 
-
+    const launchPoll = async (id:number)=>{
+        const localNow = new Date();
+        const utcNow = localNow.toISOString()
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+        await activatePoll(id,utcNow,timezone,token)
+}
     interface ContactData {
         id: number,
         email: string
@@ -107,28 +114,25 @@ const AssignmentTab = () => {
 
         <Tabs aria-label="Pills" variant="fullWidth">
             <TabItem title="Contacts & Contact Lists">
-                <div className="grid grid-cols-1 grid-rows-2 md:grid-cols-3  gap-4">
-                    <div className=" md:col-start-3 row-start-1 flex flex-col justify-center">
-
-                        <Dropdown color="light" label="Assign Contact List to Poll" value={4} className="max-h-48 overflow-y-auto mb-4 py-2 mx-auto w-3/4 " dismissOnClick={true}>
+                <div className="grid grid-cols-1">
+                    <div className=" flex  place-content-center space-x-4 mb-4">
+                        <Dropdown color="light" label="Assign Contact List to Poll" value={4} className="w-full max-w-xs overflow-y-auto shadow-sm sm:text-sm text-xs" dismissOnClick={true}>
                             {lists?.map(list =>(
                                 <DropdownItem key={list.id} className="bg-gray-50 hover:bg-gray-100"><Checkbox className="mr-2"
                                 checked={listIds.some(c=> c===list.id)}
                                 onChange={()=>handleListSelection(list.id)}/>{list.name}</DropdownItem>
                             ))}
-
-
                         </Dropdown>
-                        <Button color="cyan" className="py-8 w-3/4 align-center mx-auto shadow-lg hover:shadow-xl" onClick={()=>handleAssignButton()}>Assign Selection to Poll</Button>
+                        <Button color="cyan" className="w-full max-w-xs py-3 shadow hover:shadow-lg sm:text-sm text-xs " onClick={()=>handleAssignButton()}>Assign Selection to Poll</Button>
                     </div>
-                    <div className="md:col-span-2">
-                        <Table className="w-full shadow-md  rounded-lg col-start-1 col-span-2">
-                            <TableHead className="bg-gray-500">
-                                <TableRow className="bg-gray-500">
-                                    <TableHeadCell>
+                    <div>
+                        <Table className="w-full shadow-md rounded-md table-auto">
+                            <TableHead>
+                                <TableRow >
+                                    <TableHeadCell className="bg-gray-200">
                                         <Checkbox checked={newAssigments.length === unassigned.length} onChange={() => handleCheckAll()} />
                                     </TableHeadCell>
-                                    <TableHeadCell className="font-bold text-center text-lg text-black normal-case bg-gray-200 ">Email</TableHeadCell>
+                                    <TableHeadCell className="font-bold text-center text-sm sm:text-base text-black bg-gray-200">EMAIL</TableHeadCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody className="divide-y">
@@ -139,7 +143,7 @@ const AssignmentTab = () => {
                                                 <Checkbox checked={newAssigments.some(c => c === contact.id)}
                                                     onChange={() => handleCheck(contact)} />
                                             </TableCell>
-                                            <TableCell className="whitespace-nowrap font-normal text-md text-start font-medium text-black ">
+                                            <TableCell className="whitespace-nowrap font-normal text-md text-start text-gray-700 ">
                                                 {contact.email}
                                             </TableCell>
                                         </TableRow>
@@ -152,20 +156,20 @@ const AssignmentTab = () => {
             </TabItem>
 
             <TabItem title="Pollees">
-                <div className="grid grid-cols-1 grid-rows-2 md:grid-cols-3  gap-4">
-                    <div className=" md:col-start-3 row-start-1 flex flex-col justify-center">
-                        <Button color="cyan" className="py-8 w-3/4 align-center mx-auto shadow-lg hover:shadow-xl">Launch Poll</Button>
-                        <Button color="red" className="py-4 w-3/4 align-center mx-auto mt-4" onClick={()=>handleDeleteButton()}>Remove Selection</Button>
+                <div className="grid grid-cols-1">
+                    <div className="flex  place-content-center space-x-4 mb-4">
+                        <Button color="red" className="w-full max-w-xs py-3 shadow hover:shadow-lg sm:text-sm text-xs" onClick={()=>handleDeleteButton()}>Remove Selection</Button>
+                        <Button color="cyan" className="w-full max-w-xs py-3 shadow hover:shadow-lg sm:text-sm text-xs" onClick={()=>launchPoll(slug)}>Launch Poll</Button>
                     </div>
-                    <div className="md:col-span-2">
-                        <Table className="w-full shadow-md  rounded-lg">
-                            <TableHead className="bg-gray-500">
-                                <TableRow className="bg-gray-500">
-                                    <TableHeadCell>
+                    <div>
+                        <Table className="w-full shadow-md rounded-md table-auto">
+                            <TableHead >
+                                <TableRow>
+                                    <TableHeadCell className="bg-gray-200">
                                         <Checkbox checked={assignments.length === deleteAssignments.length}
                                             onChange={() => handleDeleteCheckAll()} />
                                     </TableHeadCell>
-                                    <TableHeadCell className="font-bold text-center text-lg text-black normal-case bg-gray-200 ">Email</TableHeadCell>
+                                    <TableHeadCell className="font-bold text-center text-sm sm:text-base text-black bg-gray-200 ">Email</TableHeadCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody className="divide-y">

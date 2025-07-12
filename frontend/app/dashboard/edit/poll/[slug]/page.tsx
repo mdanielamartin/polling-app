@@ -11,30 +11,30 @@ import useUserStore from "../../../../../store/userStore";
 const EditPoll = () => {
     const params = useParams()
     const slug = Number(params.slug)
-    const {getPoll} = usePollStore()
-    const {token} = useUserStore()
+    const { getPoll } = usePollStore()
+    const { token } = useUserStore()
 
-    const onLoad = async ()=>{
-        await getPoll(slug,token)
+    const onLoad = async () => {
+        await getPoll(slug, token)
     }
-    useEffect(()=>{
+    useEffect(() => {
         onLoad()
-    },[])
+    }, [])
 
     return (
         <div className="m-3">
-            <Tabs aria-label="Pills" variant="pills">
-                <TabItem active title="Choices">
-                    <ChoicesTab/>
-                </TabItem>
-                <TabItem title="Pollee Assignments">
-                    <AssignmentTab/>
-                </TabItem>
-                <TabItem title="Poll Details">
-                    <EditPollTab/>
-                </TabItem>
-            </Tabs>
-        </div>
+                <Tabs aria-label="Pills" variant="pills" >
+                    <TabItem active title="Choices">
+                        <ChoicesTab />
+                    </TabItem>
+                    <TabItem title="Pollee Assignments">
+                        <AssignmentTab />
+                    </TabItem>
+                    <TabItem title="Poll Details">
+                        <EditPollTab />
+                    </TabItem>
+                </Tabs>
+            </div>
     );
 }
 

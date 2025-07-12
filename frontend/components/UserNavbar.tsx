@@ -13,15 +13,15 @@ const UserNavbar = () =>{
       </NavbarBrand>
       <NavbarToggle />
       <NavbarCollapse className="mx-2 text-md">
-        <NavbarLink href="#" active >
+        <NavbarLink as={Link} href="/dashboard" active >
           Dashboard
         </NavbarLink>
-        <NavbarLink as={Link} href="#">
+        <NavbarLink as={Link} href="/dashboard/active">
           Active Polls
         </NavbarLink>
-        <NavbarLink href="#">View Results</NavbarLink>
-        <NavbarLink href="#">My Contacts</NavbarLink>
-        <NavbarLink href="#">Logout</NavbarLink>
+        <NavbarLink as={Link} href="/dashboard/completed">Results</NavbarLink>
+        <NavbarLink as={Link} href="/dashboard/contacts">Contacts</NavbarLink>
+        <NavbarLink as={Link} href="/login">Logout</NavbarLink>
       </NavbarCollapse>
     </Navbar>
   );

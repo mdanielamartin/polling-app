@@ -110,8 +110,8 @@ const Contacts = () => {
 
 
     return (
-        <div className="flex flex-cols min-h-screen w-full justify-center m-2">
-            <Tabs className="min-w-8/10 max-w-9/10" aria-label="Pills" variant="pills"
+        <div className="flex flex-col min-h-screen w-full justify-center px-4 py-6">
+            <Tabs className="min-w-[80] max-w-[90]" aria-label="Pills" variant="pills"
                 onActiveTabChange={() => { setSelection([]); setListSelection([]); setEdit((prev) => ({ ...prev, status: false, email: "", id: null })) }}>
                 <TabItem active={activeTab === 0} title="All" onClick={() => setActiveTab(0)}>
                     <div className="flex place-content-between mb-5">
@@ -127,20 +127,19 @@ const Contacts = () => {
                             onActionComplete={clearSelections}
                         />
                     </div>
-                    <form className="flex place-content-around w-full my-3 items-center" onSubmit={handleSubmit(onSubmit)}>
-
-                        <TextInput className="min-w-7/10" id="email1" type="email" placeholder="contact_email@domain.com..." required {...register("email")} />
+                    <form className="flex w-full my-3 items-center justify-center space-x-2" onSubmit={handleSubmit(onSubmit)}>
+                        <TextInput className="min-w-8/10 text-sm sm:text-base md:text-lg" id="email1" type="email" placeholder="contact_email@domain.com..." required {...register("email")} />
                         <p className="text-red-500">{errors.email?.message}</p>
-                        <Button className="block" size="lg" color="alternative" type="submit">Add Contact</Button>
+                        <Button className="block text-sm sm:text-base md:text-lg whitespace-nowrap" size="lg" color="alternative" type="submit">Add Contact</Button>
                     </form>
-                    <Table className="w-full shadow-md  rounded-lg">
-                        <TableHead className="bg-gray-500">
+                    <Table className="w-full shadow-md rounded-lg">
+                        <TableHead >
 
-                            <TableRow className="bg-gray-500">
-                                <TableHeadCell>
+                            <TableRow >
+                                <TableHeadCell className="bg-gray-200">
                                     <Checkbox checked={selection.length === contacts.length} onChange={() => handleCheckAll()} />
                                 </TableHeadCell>
-                                <TableHeadCell className="font-bold text-center text-lg text-black normal-case bg-gray-200 ">Email</TableHeadCell>
+                                <TableHeadCell className="font-bold text-center text-lg text-black bg-gray-200 ">Email</TableHeadCell>
                                 <TableHeadCell className="font-bold text-center text-lg text-black normal-case bg-gray-200 ">
                                     <span className="sr-only bg-gray-200">Actions</span>
                                 </TableHeadCell>
@@ -152,7 +151,7 @@ const Contacts = () => {
 
                                     {edit.status && edit.id === contact.id ?
                                         <>
-                                            <TableCell className="whitespace-nowrap font-normal text-md text-start font-medium text-black ">
+                                            <TableCell className="whitespace-nowrap font-normal text-md text-start text-gray-700 ">
                                                 <TextInput id="name" type="text"
                                                     onChange={(e) => setEdit((prev) => ({ ...prev, email: e.target.value }))}
                                                     value={edit.email} placeholder="name@flowbite.com" required />
@@ -172,7 +171,7 @@ const Contacts = () => {
                                                 <Checkbox checked={selection.some(c => c === contact.id)}
                                                     onChange={() => handleCheck(contact)} />
                                             </TableCell>
-                                            <TableCell className="whitespace-nowrap font-normal text-md text-start font-medium text-black ">
+                                            <TableCell className="whitespace-nowrap font-normal text-md text-start  text-gray-700 ">
                                                 {contact.email}
                                             </TableCell>
                                             <TableCell className="text-end">    <ButtonGroup>
@@ -195,14 +194,14 @@ const Contacts = () => {
                             <Button color="red" onClick={() => deleteListButton(list.id)}>Delete Current List</Button>
 
                         </div>
-                        <Table className="w-full shadow-md bg-gray-500 rounded-lg">
-                            <TableHead className="bg-gray-500">
-                                <TableRow className="bg-gray-500">
-                                    <TableHeadCell>
+                        <Table className="w-full shadow-md rounded-lg">
+                            <TableHead >
+                                <TableRow>
+                                    <TableHeadCell className="bg-gray-200">
                                         <Checkbox checked={list.pollees.length === listSelection.length} onChange={() => handleListCheckAll(list)} />
                                     </TableHeadCell>
-                                    <TableHeadCell className="font-bold text-start text-lg text-black normal-case">Email</TableHeadCell>
-                                    <TableHeadCell>
+                                    <TableHeadCell className="font-bold text-start text-lg text-black bg-gray-200">Email</TableHeadCell>
+                                    <TableHeadCell className="bg-gray-200">
                                         <span className="sr-only">Actions</span>
                                     </TableHeadCell>
                                 </TableRow>
@@ -214,10 +213,10 @@ const Contacts = () => {
                                             <Checkbox checked={listSelection.some(c => c === contact.id)}
                                                 onChange={() => handleListCheck(contact)} />
                                         </TableCell>
-                                        <TableCell className="whitespace-nowrap font-normal text-md text-start font-medium text-black ">
+                                        <TableCell className="whitespace-nowrap font-normal text-md text-start text-gray-700">
                                             {contact.email}
                                         </TableCell>
-                                        <TableCell className="text-end">
+                                        <TableCell className="flex justify-center">
                                             <Button color="red" onClick={() => removeFromListButton([contact.id], list.id)}>Remove</Button>
                                         </TableCell>
                                     </TableRow>

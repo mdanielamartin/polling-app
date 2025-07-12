@@ -53,50 +53,61 @@ if (!isLoading && polls.length == 0){
 
 return (
 <div className="flex flex-col min-h-screen w-full items-center px-2 py-4">
-  <div className="w-full max-w-7xl overflow-x-auto shadow-md rounded-md">
-    <Table className="min-w-max">
-      <TableHead className="bg-gray-500">
-        <TableRow className="bg-gray-100">
-          <TableHeadCell className="font-bold text-center text-lg text-black normal-case whitespace-nowrap">
-            Name
-          </TableHeadCell>
-          <TableHeadCell className="font-bold text-center text-lg text-black normal-case whitespace-nowrap">
-            Creation Date
-          </TableHeadCell>
-          <TableHeadCell className="font-bold text-center text-lg text-black normal-case whitespace-nowrap">
-            Duration
-          </TableHeadCell>
-          <TableHeadCell>
-            <span className="sr-only">Actions</span>
+  <div className="w-full max-w-7xl overflow-x-auto shadow-lg rounded-lg border border-gray-300">
+    <Table className="w-full shadow-md rounded-md table-auto">
+      <TableHead>
+        <TableRow>
+          {["Name", "Creation Date", "Duration"].map((heading) => (
+            <TableHeadCell
+              key={heading}
+              className="font-bold text-center text-sm sm:text-base text-black bg-gray-200"
+            >
+              {heading}
+            </TableHeadCell>
+          ))}
+          <TableHeadCell className="bg-gray-200">
+            <span className="sr-only bg-gray-200">Actions</span>
           </TableHeadCell>
         </TableRow>
       </TableHead>
-      <TableBody className="divide-y">
+
+      <TableBody className="divide-y divide-gray-300">
         {polls?.map((poll) => (
-          <TableRow key={poll.id} className="bg-gray-50 hover:bg-gray-200">
-            <TableCell className="text-center text-md text-black whitespace-nowrap">
+          <TableRow key={poll.id} className="bg-white hover:bg-gray-100 transition-colors">
+            <TableCell className="whitespace-nowrap text-center text-sm sm:text-base text-black">
               {poll.name}
             </TableCell>
-            <TableCell className="text-center text-gray-800 whitespace-nowrap">
+            <TableCell className="text-center text-gray-700 text-sm sm:text-base">
               {poll.created_at}
             </TableCell>
-            <TableCell className="text-center text-gray-800 whitespace-nowrap">
+            <TableCell className="text-center text-gray-700 text-sm sm:text-base">
               {poll.time_limit_days}
             </TableCell>
-            <TableCell className="text-center whitespace-nowrap">
+            <TableCell className="text-center text-gray-700 text-sm sm:text-base">
               <ButtonGroup>
                 <Button
                   color="red"
+                  className="text-sm px-2 py-1"
                   onClick={async () => {
                     await deletePoll(poll.id, token);
                   }}
                 >
                   Delete
                 </Button>
-                <Button color="alternative" onClick={() => launchPoll(poll.id)}>
+                <Button
+                  color="alternative"
+                  className="text-sm px-2 py-1"
+                  onClick={() => launchPoll(poll.id)}
+                >
                   Launch
                 </Button>
-                <Button color="alternative" onClick={()=>editButton(poll.id)}>Edit</Button>
+                <Button
+                  color="alternative"
+                  className="text-sm px-2 py-1"
+                  onClick={() => editButton(poll.id)}
+                >
+                  Edit
+                </Button>
               </ButtonGroup>
             </TableCell>
           </TableRow>
