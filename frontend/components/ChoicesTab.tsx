@@ -142,9 +142,9 @@ const ChoicesTab = () => {
 
                                     </div>
                                 </div>
-                                <div className="flex flex-col sm:flex-row sm:justify-between w-1/7 sm:w-auto gap-2 mr-5">
-                                    <Button color="red" onClick={()=>deleteChoiceButton(choice.id)}><FaTrash className="text-lg" /></Button>
-                                    <Button color="yellow" onClick={() => editingRequest(choice, choice.id)}><FaEdit className="text-lg" /></Button>
+                                <div className="flex flex-col sm:flex-row sm:justify-between sm:w-auto gap-2 mr-5">
+                                    <Button color="red" onClick={()=>deleteChoiceButton(choice.id)}><FaTrash className="sm:text-lg text-sm" /></Button>
+                                    <Button color="yellow" onClick={() => editingRequest(choice, choice.id)}><FaEdit className="sm:text-lg text-sm" /></Button>
                                 </div>
                             </ListItem>
 

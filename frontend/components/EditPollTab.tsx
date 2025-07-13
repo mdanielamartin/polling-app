@@ -52,42 +52,69 @@ const EditPollTab = () => {
     },[reset,setSelectedDay,poll])
 
     return (
-        <div className="bg-gray-100 h-auto min-w-95/100 rounded-xl px-4 py- mx-auto  my-4 justify-center ">
-            <form className="mx-auto p-4" onSubmit={handleSubmit(onSubmit)}>
-                <div className="grid grid-cols-1 grid-rows-4 sm:grid-cols-4 sm:grid-rows-2 gap-x-4 gap-y-0">
-                    <div className="sm:col-span-3 items-center ">
-                        <div className="mb-2 block">
-                            <Label className="text-md" htmlFor="name">Poll Name</Label>
-                        </div>
-                        <TextInput id="name" type="text"  required {...register("name")} />
-                          <p className="text-red-500">{errors.name?.message}</p>
-                    </div>
-                    <div className="sm:col-start-4">
-                        <div className="mb-2 block">
-                            <Label className="text-md" htmlFor="name">Poll Validity in Days</Label>
-                        </div>
-                        <Dropdown color="alternative" label={selectedDay ? selectedDay : "Duration"} className="max-h-48 overflow-y-auto w-full" dismissOnClick={true}>
-                            {days.map((day, index) => {
-                                return (
-                                    <DropdownItem onClick={() => setSelectedDay(day)} className="bg-gray-50 hover:bg-gray-100" key={index}>{day}</DropdownItem>
-                                )
-                            })}
-                        </Dropdown>
-                        <p className="text-red-500">{errors.time_limit_days?.message}</p>
-                    </div>
-                    <div className="sm:col-span-3 sm:row-start-2">
-                        <div className="mb-2 block">
-                            <Label className="text-md" htmlFor="description">Description</Label>
-                        </div>
-                        <Textarea className="overflow-y-auto" id="description" rows={2} {...register("description")} />
-                        <p className="text-red-500">{errors.description?.message}</p>
-                    </div>
-                    <div className="sm:col-start-4 sm:row-start-2 flex flex-col justify-end h-full">
-                        <Button color="alternative" className="w-full h-15 shadow-lg hover:shadow-xl" type="submit">Update</Button>
-                    </div>
-                </div>
-            </form>
-        </div>
+       <div className="bg-gray-100 rounded-xl px-4 py-6 mx-auto my-4 w-full max-w-5xl">
+  <form className="mx-auto p-4" onSubmit={handleSubmit(onSubmit)}>
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-x-4 gap-y-6">
+
+      <div className="md:col-span-3">
+        <Label className="text-md mb-2 block" htmlFor="name">
+          Poll Name
+        </Label>
+        <TextInput id="name" type="text" required {...register("name")} />
+        <p className="text-red-500 text-sm mt-1">{errors.name?.message}</p>
+      </div>
+
+
+      <div className="md:col-span-1 flex flex-col justify-start">
+        <Label className="text-md mb-2 block" htmlFor="duration">
+          Duration
+        </Label>
+        <Dropdown
+          color="alternative"
+          label={selectedDay || "Days"}
+          className="max-h-40 w-full overflow-y-auto"
+          dismissOnClick
+          placement="bottom"
+        >
+          {days.map((day, index) => (
+            <DropdownItem
+              key={index}
+              className="bg-gray-50 hover:bg-gray-100"
+              onClick={() => setSelectedDay(day)}
+            >
+              {day}
+            </DropdownItem>
+          ))}
+        </Dropdown>
+        <p className="text-red-500 text-sm mt-1">{errors.time_limit_days?.message}</p>
+      </div>
+
+      <div className="md:col-span-4">
+        <Label className="text-md mb-2 block" htmlFor="description">
+          Description
+        </Label>
+        <Textarea
+          id="description"
+          rows={3}
+          className="overflow-y-auto w-full"
+          {...register("description")}
+        />
+        <p className="text-red-500 text-sm mt-1">{errors.description?.message}</p>
+      </div>
+
+
+      <div className="md:col-span-4 flex items-cemter w-full">
+        <Button
+          color="alternative"
+          className="w-full flex h-15  shadow-lg hover:shadow-xl"
+          type="submit"
+        >
+          Update
+        </Button>
+      </div>
+    </div>
+  </form>
+</div>
 
     )
 }
