@@ -21,7 +21,7 @@ const ConfirmDeletion = ({message,title, contactIds, onActionComplete}) => {
 
   return (
     <>
-      <Button color="red" disabled={contactIds.length > 0 ? false:true} onClick={() => setOpenModal(true)}>{title}</Button>
+      <Button className="cursor:pointer w-full sm:w-auto text-xs sm:text-base md:text-md" color="red" disabled={contactIds.length > 0 ? false:true} onClick={() => setOpenModal(true)}>{title}</Button>
       <Modal show={openModal} size="md" onClose={() => setOpenModal(false)} popup>
         <ModalHeader />
         <ModalBody>

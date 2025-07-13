@@ -2,7 +2,9 @@
 import { Checkbox, TextInput, Tabs, TabItem, Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, Button, ButtonGroup } from "flowbite-react";
 
 import { useState, useEffect } from "react";
-import { FaTrash } from "react-icons/fa";
+import { FaTrash } from "react-icons/fa6";
+import { FaEdit, FaCheck, FaTimes } from "react-icons/fa";
+
 import AddListModal from "../../../components/AddListModal";
 import ListSelectionModal from "../../../components/ListSelectionModal";
 import ConfirmDeletion from "../../../components/ConfirmDeletion";
@@ -110,16 +112,16 @@ const Contacts = () => {
 
 
     return (
-        <div className="flex flex-col min-h-screen w-full justify-center px-4 py-6">
-            <Tabs className="min-w-[80] max-w-[90]" aria-label="Pills" variant="pills"
+        <div className="flex flex-col min-h-screen w-full justify-start items-center px-5 py-6">
+            <Tabs className="w-full" aria-label="Pills" variant="pills"
                 onActiveTabChange={() => { setSelection([]); setListSelection([]); setEdit((prev) => ({ ...prev, status: false, email: "", id: null })) }}>
-                <TabItem active={activeTab === 0} title="All" onClick={() => setActiveTab(0)}>
-                    <div className="flex place-content-between mb-5">
+                <TabItem active={activeTab === 0} title="All" onClick={() => setActiveTab(0)} className="overflow-x-auto items-center justify-start border">
+                    <div className="flex flex-wrap justify-between gap-2 sm:gap-4 mb-5">
                         <ListSelectionModal contactIds={selection} onActionComplete={clearSelections} />
                         <AddListModal editing={false} listName={""} id={null} />
                         <ConfirmDeletion message="Are you sure you want to delete the selected contacts?" title=
                             {
-                                <span className="flex items-center gap-2">
+                                <span className="flex text-sm sm:text-base md:text-lg items-center gap-2">
                                     <FaTrash className="text-sm" />
                                     Delete Selection
                                 </span>} contactIds={selection}
@@ -127,80 +129,94 @@ const Contacts = () => {
                             onActionComplete={clearSelections}
                         />
                     </div>
-                    <form className="flex w-full my-3 items-center justify-center space-x-2" onSubmit={handleSubmit(onSubmit)}>
-                        <TextInput className="min-w-8/10 text-sm sm:text-base md:text-lg" id="email1" type="email" placeholder="contact_email@domain.com..." required {...register("email")} />
+                    <form className="flex flex-col w-full my-4 items-center justify-center sm:space-x-2 space-y-2" onSubmit={handleSubmit(onSubmit)}>
+                        <TextInput className="w-full text-sm sm:text-base md:text-lg" id="email1" type="email" placeholder="contact_email@domain.com..." required {...register("email")} />
                         <p className="text-red-500">{errors.email?.message}</p>
-                        <Button className="block text-sm sm:text-base md:text-lg whitespace-nowrap" size="lg" color="alternative" type="submit">Add Contact</Button>
+                        <Button className="block text-sm sm:text-base md:text-lg whitespace-nowrap w-full shadow-lg" size="lg" color="alternative" type="submit">Add Contact</Button>
                     </form>
-                    <Table className="w-full shadow-md rounded-lg">
-                        <TableHead >
+                    <div className="w-full overflow-x-auto sm:overflow-visible">
 
-                            <TableRow >
-                                <TableHeadCell className="bg-gray-200">
-                                    <Checkbox checked={selection.length === contacts.length} onChange={() => handleCheckAll()} />
-                                </TableHeadCell>
-                                <TableHeadCell className="font-bold text-center text-lg text-black bg-gray-200 ">Email</TableHeadCell>
-                                <TableHeadCell className="font-bold text-center text-lg text-black normal-case bg-gray-200 ">
-                                    <span className="sr-only bg-gray-200">Actions</span>
-                                </TableHeadCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody className="divide-y">
-                            {contacts.map(contact => (
-                                <TableRow key={contact.id} className="bg-white hover:bg-gray-100">
 
-                                    {edit.status && edit.id === contact.id ?
-                                        <>
-                                            <TableCell className="whitespace-nowrap font-normal text-md text-start text-gray-700 ">
-                                                <TextInput id="name" type="text"
-                                                    onChange={(e) => setEdit((prev) => ({ ...prev, email: e.target.value }))}
-                                                    value={edit.email} placeholder="name@flowbite.com" required />
-                                            </TableCell>
+                        <Table className="max-w-[95] shadow-md rounded-lg  overflow-scroll table-auto">
+                            <TableHead >
 
-                                            <TableCell className="whitespace-nowrap font-normal text-md text-start font-medium text-black flex space-x-3">
-                                                <Button color="red" onClick={() => setEdit((prev) => ({ ...prev, status: false, email: "", id: null }))}>Cancel</Button>
-                                                <Button color="alternative" onClick={() => updateContactButton()}>Update</Button>
-
-                                            </TableCell>
-
-                                        </>
-
-                                        :
-                                        <>
-                                            <TableCell>
-                                                <Checkbox checked={selection.some(c => c === contact.id)}
-                                                    onChange={() => handleCheck(contact)} />
-                                            </TableCell>
-                                            <TableCell className="whitespace-nowrap font-normal text-md text-start  text-gray-700 ">
-                                                {contact.email}
-                                            </TableCell>
-                                            <TableCell className="text-end">    <ButtonGroup>
-                                                <Button color="red" onClick={() => singleDeletion(contact.id)}>Delete</Button>
-                                                <Button color="alternative" onClick={() => editRequest(contact.email, contact.id)}>Edit</Button>
-                                            </ButtonGroup></TableCell>
-                                        </>
-                                    }
+                                <TableRow >
+                                    <TableHeadCell className="bg-gray-200">
+                                        <Checkbox checked={selection.length === contacts.length} onChange={() => handleCheckAll()} />
+                                    </TableHeadCell>
+                                    <TableHeadCell className="font-bold text-center text-lg text-black bg-gray-200 ">Email</TableHeadCell>
+                                    <TableHeadCell className="font-bold text-center text-lg text-black normal-case bg-gray-200 ">
+                                        <span className="sr-only bg-gray-200">Actions</span>
+                                    </TableHeadCell>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                            </TableHead>
+                            <TableBody className="divide-y">
+                                {contacts.map(contact => (
+                                    <TableRow key={contact.id} className="bg-white hover:bg-gray-100">
+
+                                        {edit.status && edit.id === contact.id ?
+                                            <>
+
+                                                <TableCell className="whitespace-nowrap font-normal  text-md text-start text-gray-700 ">
+
+                                                </TableCell>
+                                                <TableCell className="whitespace-nowrap font-normal  text-md text-start text-gray-700 ">
+                                                    <TextInput id="name" type="text"
+                                                        onChange={(e) => setEdit((prev) => ({ ...prev, email: e.target.value }))}
+                                                        value={edit.email} placeholder="name@flowbite.com"
+                                                        className="w-full sm:w-[20rem] text-sm sm:text-base" required />
+                                                </TableCell>
+
+                                                <TableCell className="whitespace-nowrap font-normal justify-center text-black flex space-x-1">
+                                                    <Button color="red" size="xs" className="text-xs" onClick={() => setEdit((prev) => ({ ...prev, status: false, email: "", id: null }))}><FaTimes /></Button>
+                                                    <Button color="green" size="xs" className="text-xs" onClick={() => updateContactButton()}><FaCheck /></Button>
+                                                </TableCell>
+
+                                            </>
+
+                                            :
+                                            <>
+                                                <TableCell>
+                                                    <Checkbox checked={selection.some(c => c === contact.id)}
+                                                        onChange={() => handleCheck(contact)} />
+                                                </TableCell>
+                                                <TableCell className=" whitespace-nowrap font-normal text-md text-start text-gray-700 ">
+                                                    {contact.email}
+                                                </TableCell>
+                                                <TableCell className="text-end">    <ButtonGroup>
+                                                    <Button size="sm" className="text-xs" color="red" onClick={() => singleDeletion(contact.id)}><FaTrash /></Button>
+                                                    <Button size="sm" className="text-xs" color="alternative" onClick={() => editRequest(contact.email, contact.id)}><FaEdit /></Button>
+                                                </ButtonGroup></TableCell>
+                                            </>
+                                        }
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
+
+
+
                 </TabItem>
                 {lists?.map((list) => (
                     <TabItem key={list.id} title={list.name} active={activeTab === list.id} onClick={() => setActiveTab(list.id)}>
-                        <div className="flex place-content-between mb-5">
+                        <div className="flex flex-wrap justify-between gap-2 sm:gap-4 mb-5">
 
                             <AddListModal editing={true} listName={list.name} id={list.id} />
-                            <Button color="light" onClick={() => removeFromListButton(listSelection, list.id)}>Remove Selection From List</Button>
-                            <Button color="red" onClick={() => deleteListButton(list.id)}>Delete Current List</Button>
+                            <Button color="light" className="text-xs cursor:pointer w-full sm:w-auto  sm:text-base md:text-md" onClick={() => removeFromListButton(listSelection, list.id)}>Remove Selection From List</Button>
+                            <Button color="red" className="text-xs cursor:pointer w-full sm:w-auto  sm:text-base md:text-md" onClick={() => deleteListButton(list.id)}>Delete Current List</Button>
 
                         </div>
+                        <div className="w-full overflow-x-auto sm:overflow-visible">
+
+
                         <Table className="w-full shadow-md rounded-lg">
                             <TableHead >
                                 <TableRow>
                                     <TableHeadCell className="bg-gray-200">
                                         <Checkbox checked={list.pollees.length === listSelection.length} onChange={() => handleListCheckAll(list)} />
                                     </TableHeadCell>
-                                    <TableHeadCell className="font-bold text-start text-lg text-black bg-gray-200">Email</TableHeadCell>
+                                    <TableHeadCell className="font-bold text-center text-lg text-black bg-gray-200 ">Email</TableHeadCell>
                                     <TableHeadCell className="bg-gray-200">
                                         <span className="sr-only">Actions</span>
                                     </TableHeadCell>
@@ -213,16 +229,17 @@ const Contacts = () => {
                                             <Checkbox checked={listSelection.some(c => c === contact.id)}
                                                 onChange={() => handleListCheck(contact)} />
                                         </TableCell>
-                                        <TableCell className="whitespace-nowrap font-normal text-md text-start text-gray-700">
+                                        <TableCell className="whitespace-nowrap font-normal text-md text-start  text-gray-700 ">
                                             {contact.email}
                                         </TableCell>
-                                        <TableCell className="flex justify-center">
-                                            <Button color="red" onClick={() => removeFromListButton([contact.id], list.id)}>Remove</Button>
+                                        <TableCell className="flex justify-center justify-start">
+                                            <Button className="text-xs " size="sm" color="red" onClick={() => removeFromListButton([contact.id], list.id)}><FaTimes /></Button>
                                         </TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
                         </Table>
+                        </div>
                     </TabItem>
                 ))}
             </Tabs>

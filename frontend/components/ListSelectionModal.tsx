@@ -26,7 +26,7 @@ const ListSelectionModal = ({contactIds, onActionComplete}) => {
 
     return (
         <>
-            <Button color="light" className="cursor:pointer" onClick={() => setOpenModal(true)}><FaClipboardList className="mr-2 text-xl" />Add Selection to List</Button>
+            <Button color="light" className="cursor:pointer w-full sm:w-auto text-xs sm:text-base md:text-md" onClick={() => setOpenModal(true)}><FaClipboardList className="mr-2 text-xl text-xs sm:text-base md:text-md" />Add Selection to List</Button>
             <Modal show={openModal} size="sm" className="text-gray-900" onClose={onCloseModal} popup>
                 <ModalHeader />
                 <ModalBody>

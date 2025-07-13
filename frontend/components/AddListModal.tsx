@@ -31,7 +31,7 @@ const AddListModal = ({editing,listName,id}) => {
 
     return (
         <>
-            <Button color="light" className="cursor:pointer" onClick={() => setOpenModal(true)}><MdFormatListBulletedAdd className="mr-2 text-xl" />{editing ? "Update List Name":"Create New List"}</Button>
+            <Button color="light" className="cursor:pointer w-full sm:w-auto text-xs sm:text-base md:text-md" onClick={() => setOpenModal(true)}><MdFormatListBulletedAdd className="mr-2 text-xs sm:text-base md:text-md" />{editing ? "Update List Name":"Create New List"}</Button>
             <Modal show={openModal} size="sm" className="text-gray-900" onClose={onCloseModal} popup>
                 <ModalHeader />
                 <ModalBody>
