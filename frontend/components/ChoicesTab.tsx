@@ -5,7 +5,7 @@ import { FaEdit } from "react-icons/fa";
 import { useForm } from "react-hook-form";
 import * as yup from "yup"
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import useChoiceStore from "../store/choiceStore";
 import useUserStore from "../store/userStore";
 import { useParams } from "next/navigation";
@@ -16,8 +16,8 @@ const ChoicesTab = () => {
     const slug = Number(params.slug)
 
     const [editing, setEditing] = useState<number | null>(null)
-    const {choices, getChoices, addChoice, updateChoice, deleteChoice} = useChoiceStore()
-    const {token} = useUserStore()
+    const { choices, addChoice, updateChoice, deleteChoice } = useChoiceStore()
+    const { token } = useUserStore()
 
     const choiceSchema = yup.object().shape({
         name: yup.string().min(1).max(50, "name cannot exceed 50 characters").required("Choice must have a name"),
@@ -30,7 +30,13 @@ const ChoicesTab = () => {
     }
 
 
-    const { register, reset, handleSubmit, formState: { errors } } = useForm({ resolver: yupResolver(choiceSchema) })
+    const { register, reset, handleSubmit, formState: { errors } } = useForm({
+        resolver: yupResolver(choiceSchema), defaultValues: {
+            name: "",
+            description: ""
+        }
+
+    })
     const {
         register: registerEdit,
         handleSubmit: handleSubmitEdit,
@@ -39,33 +45,27 @@ const ChoicesTab = () => {
         getValues
     } = useForm({ resolver: yupResolver(choiceSchema) });
 
-    const onSubmit = async(data: FormData) => {
-        await addChoice(data,token, slug)
+    const onSubmit = async (data: FormData) => {
+        await addChoice(data, token, slug)
         reset()
         setEditing(null)
     };
 
-    const onSubmitEdit = async(data: FormData, id: number) =>{
-        const updateData = {...data,id:id}
-        await updateChoice(updateData,token,slug)
+    const onSubmitEdit = async (data: FormData, id: number) => {
+        const updateData = { ...data, id: id }
+        await updateChoice(updateData, token, slug)
         reset()
         setEditing(null)
     }
 
-    const editingRequest = (data:   FormData, id: number) => {
+    const editingRequest = (data: FormData, id: number) => {
         setEditing(id)
         resetEdit({ name: data.name, description: data.description })
     }
-    const deleteChoiceButton = async (id:number)=>{
-        await deleteChoice(id,token,slug)
+    const deleteChoiceButton = async (id: number) => {
+        await deleteChoice(id, token, slug)
     }
 
-    const onLoad = async ()=>{
-        await getChoices(slug,token)
-    }
-    useEffect(()=>{
-        onLoad()
-    },[])
 
     return (
 
@@ -102,7 +102,7 @@ const ChoicesTab = () => {
 
                         choice.id === editing ?
                             <ListItem key={choice.id} className="text-black bg-stone-50 hover:bg-stone-100 rounded-lg border pl-4 py-5 border items-center justify-center flex">
-                                <form onSubmit={handleSubmitEdit(()=>onSubmitEdit(getValues(),choice.id))} className=" grid md:grid-cols-5 grid-cols-1 gap-3 mx-auto p-4 w-full flex items-center justify-center place-content-between">
+                                <form onSubmit={handleSubmitEdit(() => onSubmitEdit(getValues(), choice.id))} className=" grid md:grid-cols-5 grid-cols-1 gap-3 mx-auto p-4 w-full flex items-center justify-center place-content-between">
                                     <div className="md:col-span-4">
                                         <div className="items-center">
                                             <div className="block">
@@ -120,12 +120,12 @@ const ChoicesTab = () => {
                                             <p className="text-red-500">{editErrors.description?.message}</p>
                                         </div>
                                     </div>
-                                        <div className="justify-center items-center md:col-span-1">
-                                            <div className="mx-auto flex space-x-2 justify-end">
-                                             <Button color="red" className="shadow-lg hover:shadow-xl" onClick={()=>setEditing(null)}>Cancel</Button>
-                                                <Button color="yellow" className="shadow-lg hover:shadow-xl" type="submit">Edit</Button>
-                                            </div>
+                                    <div className="justify-center items-center md:col-span-1">
+                                        <div className="mx-auto flex space-x-2 justify-end">
+                                            <Button color="red" className="shadow-lg hover:shadow-xl" onClick={() => setEditing(null)}>Cancel</Button>
+                                            <Button color="yellow" className="shadow-lg hover:shadow-xl" type="submit">Edit</Button>
                                         </div>
+                                    </div>
                                 </form>
 
                             </ListItem>
@@ -143,7 +143,7 @@ const ChoicesTab = () => {
                                     </div>
                                 </div>
                                 <div className="flex flex-col sm:flex-row sm:justify-between sm:w-auto gap-2 mr-5">
-                                    <Button color="red" onClick={()=>deleteChoiceButton(choice.id)}><FaTrash className="sm:text-lg text-sm" /></Button>
+                                    <Button color="red" onClick={() => deleteChoiceButton(choice.id)}><FaTrash className="sm:text-lg text-sm" /></Button>
                                     <Button color="yellow" onClick={() => editingRequest(choice, choice.id)}><FaEdit className="sm:text-lg text-sm" /></Button>
                                 </div>
                             </ListItem>

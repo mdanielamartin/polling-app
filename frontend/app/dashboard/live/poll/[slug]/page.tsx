@@ -1,15 +1,15 @@
 "use client"
 import { Tabs, TabItem } from "flowbite-react";
-import ChoicesTab from "../../../../../components/ChoicesTab";
-import EditPollTab from "../../../../../components/EditPollTab";
-import AssignmentTab from "../../../../../components/AssignmentTab";
+
 import { useParams } from 'next/navigation'
 import { useEffect } from "react";
 import usePollStore from "../../../../../store/pollStore";
 import useUserStore from "../../../../../store/userStore";
 import useChoiceStore from "../../../../../store/choiceStore";
+import PollCard from "../../../../../components/PollCard";
+import PollAssignmentStatus from "../../../../../components/PollAssignmentStatus";
 
-const EditPoll = () => {
+const LivePoll = () => {
     const params = useParams()
     const slug = Number(params.slug)
     const { getPoll, poll } = usePollStore()
@@ -22,6 +22,7 @@ const EditPoll = () => {
             if (poll.choices) {
                 setChoices(poll.choices)
             }
+
         }
         onLoad()
     }, [])
@@ -29,18 +30,15 @@ const EditPoll = () => {
     return (
         <div className="m-3">
             <Tabs aria-label="Pills" variant="pills" >
-                <TabItem active title="Choices">
-                    <ChoicesTab />
+                <TabItem active title="Poll">
+                    <PollCard />
                 </TabItem>
                 <TabItem title="Pollee Assignments">
-                    <AssignmentTab />
-                </TabItem>
-                <TabItem title="Poll Details">
-                    <EditPollTab />
+                    <PollAssignmentStatus />
                 </TabItem>
             </Tabs>
         </div>
     );
 }
 
-export default EditPoll
+export default LivePoll
