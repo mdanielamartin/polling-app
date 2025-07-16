@@ -15,7 +15,7 @@ interface PollState {
     deletePoll: (id: number, token: string) => Promise<void>;
     getPolls: (token: string) => Promise<void>;
     getPoll: (data: number, token: string) => Promise<void>;
-    activatePoll: (data: number, date: string, tz: string, token: string) => Promise<void>;
+    activatePoll: (data: number, date: string, tz: string, token: string) => Promise<string>;
     getResults: (data: number, token: string) => Promise<Result[]>;
     clearError: () => void;
 
@@ -221,8 +221,10 @@ const usePollStore = create<PollState>((set) => ({
                 throw new Error(errorMessage);
             }
             set({ isLoading: false, activation: true })
+            return "All emails sent"
         } catch (err: unknown) {
             set({ error: err instanceof Error ? err.message : "Unexpected error", isLoading: false });
+            return err instanceof Error ? err.message : "Unexpected error"
 
         }
 
@@ -255,6 +257,7 @@ const usePollStore = create<PollState>((set) => ({
             set({ error: message, isLoading: false })
         }
     },
+
 
 
     clearError: () => {

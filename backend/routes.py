@@ -51,6 +51,19 @@ def login_user():
     except Exception as e:
         return jsonify(str(e)), 500
 
+@api_blueprint.route("/user", methods=["GET"])
+@jwt_required()
+def get_user():
+    user_id = get_jwt_identity()
+    auth = check_user(user_id)
+    if not auth:
+        return jsonify("User not found"), 404
+    try:
+        user = User.query.get(user_id)
+        return jsonify(user.serialize()), 200
+    except Exception as e:
+        return jsonify(str(e)), 500
+
 @api_blueprint.route("/poll/create", methods=["POST"])
 @jwt_required()
 def create_poll():
@@ -143,19 +156,19 @@ def add_choice(id):
         choice_schema = ChoiceSchema()
         choice_data = choice_schema.load(data)
     except ValidationError as e:
-        return jsonify({"error": e.messages}), 400
+        return jsonify( e.messages), 400
     try:
         poll = Poll.query.filter_by(id=id, user_id=user_id).first()
         if not poll:
-            return jsonify({"error": "Poll not found"}), 404
+            return jsonify("Poll not found"), 404
         if poll.status == "draft":
             choice = Choice(poll_id = id, name=choice_data["name"], description = choice_data["description"])
             db.session.add(choice)
             db.session.commit()
             return jsonify(choice.serialize()), 200
-        return jsonify({"error": "Only polls with draft status can be modified"}), 400
+        return jsonify("Only polls with draft status can be modified"), 400
     except Exception as e:
-        return jsonify({"error":str(e)}), 500
+        return jsonify(str(e)), 500
 
 @api_blueprint.route("/poll/<int:id>/update/choice", methods=["PUT"])
 @jwt_required()
@@ -445,8 +458,8 @@ def activate_poll(id):
         utc_publish_date = local_publish_date.astimezone(utc)
         utc_closing_date = local_closing_date.astimezone(utc)
 
-        # if poll.status == 'active':
-        #     return jsonify("This poll is already active"), 400
+        if poll.status == 'active':
+            return jsonify("This poll is already active"), 400
 
         poll.status = "active"
         poll.publish_date = utc_publish_date
@@ -462,6 +475,48 @@ def activate_poll(id):
             send_result = send_token_email(pollee.pollee.email,token,local_closing_date,user_timezone,poll.name)
             if send_result:
                 fails.append(send_result)
+            else:
+                pollee.status = True
+        if fails:
+            return fails, 400
+        return jsonify("All emails sent successfully"), 200
+    except Exception as e:
+        return jsonify(str(e)), 500
+
+@api_blueprint.route("/poll/resend/<int:id>", methods=["PUT"])
+@jwt_required()
+def activate_poll(id):
+    user_id = get_jwt_identity()
+    auth = check_user(user_id)
+    data = request.json
+    if not auth:
+        return jsonify("User not found"), 404
+    try:
+        user_tz_str = data.get("user_timezone")
+        ids = data.get("assignments")
+
+        if not user_tz_str:
+            return jsonify("Mising date and/or timezone"), 400
+        if not isinstance(ids, list) or not all(isinstance(id, int) for id in ids):
+            return jsonify("Expected a list of IDs"), 400
+        poll = Poll.query.filter_by(id=id, user_id=user_id, status="active").first()
+        if not poll:
+            return jsonify("Poll not found"), 404
+
+        user_timezone = timezone(user_tz_str)#LOCAL TIMEZONE
+        local_closing_time = poll.closing_date.astimezone(user_timezone)
+        fails = []
+        for assign_id in ids:
+            assignment = PollAssignment.get(assign_id)
+            if not assignment:
+                continue
+            token = generate_url(assignment.pollee_id,id,poll.closing_date,poll.publish_date)
+            send_result = send_token_email(assignment.pollee.email,token,local_closing_time,user_timezone,poll.name)
+            if send_result:
+                fails.append(send_result)
+            else:
+                assignment.status = True
+        db.session.commit()
         if fails:
             return fails, 400
         return jsonify("All emails sent successfully"), 200
@@ -479,23 +534,24 @@ def vote_pollee():
         vote_schema = VoteSchema()
         validated_data = vote_schema.load(data)
     except ValidationError as e:
-        return jsonify({"error": e.messages}), 400
+        return jsonify(e.messages), 400
     try:
         assignment = PollAssignment.query.filter_by(poll_id=poll_id,pollee_id=pollee_id).first()
         if not assignment:
-            return jsonify({"error": "You do not have permission to vote"}), 409
+            return jsonify("You do not have permission to vote"), 409
         poll = Poll.query.get(poll_id)
         if poll.status != 'active':
-            return jsonify({"error": "This poll has closed"}), 400
+            return jsonify("This poll has closed"), 400
         choice = Choice.query.filter_by(poll_id=poll_id,id=validated_data["choice_id"]).first()
         if choice:
             vote = Vote(poll_id=poll_id, choice_id=validated_data["choice_id"])
             db.session.add(vote)
+            db.session.delete(assignment)
             db.session.commit()
             return jsonify(f"Vote has been casted successfully"), 200
-        return jsonify({"error": "Invalid choice and poll combination"}), 400
+        return jsonify("Invalid choice and poll combination"), 400
     except Exception as e:
-        return jsonify({"error":str(e)}), 500
+        return jsonify(str(e)), 500
 
 @api_blueprint.route("/poll/vote", methods=["GET"])
 @jwt_required()

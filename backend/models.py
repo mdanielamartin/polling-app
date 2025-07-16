@@ -15,6 +15,12 @@ class User(db.Model):
     pollees = db.relationship("Pollee", back_populates="user",  cascade="all, delete-orphan")
     lists = db.relationship("List", back_populates="user",  cascade="all, delete-orphan")
 
+    def serialize(self):
+        return {
+            "id": self.id,
+            "email":self.email
+        }
+
 def get_utc_time():
     return datetime.now(timezone.utc)
 
@@ -112,7 +118,7 @@ class PollAssignment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     poll_id = db.Column(db.Integer, db.ForeignKey('poll.id'), nullable=False)
     pollee_id = db.Column(db.Integer, db.ForeignKey('pollee.id'), nullable=False)
-
+    status = db.Column(db.Boolean, default="False", nullable=True)
     poll = db.relationship("Poll", back_populates="assignments")
     pollee = db.relationship("Pollee", back_populates = "assignments", lazy="joined")
 
@@ -123,7 +129,8 @@ class PollAssignment(db.Model):
             "id": self.id,
             "poll_id": self.poll_id,
             "pollee_id": self.pollee_id,
-            "email": self.pollee.email
+            "email": self.pollee.email,
+            "status":self.status
         }
 
 
@@ -132,7 +139,6 @@ class Vote(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     poll_id = db.Column(db.Integer, db.ForeignKey("poll.id"), nullable=False)
     choice_id = db.Column(db.Integer, db.ForeignKey("choice.id"), nullable=False)
-    unique_constraint = db.UniqueConstraint('pollee_id', 'poll_id', name='one_vote')
 
     poll = db.relationship("Poll", back_populates="votes")
     choices = db.relationship("Choice", back_populates = "votes")
