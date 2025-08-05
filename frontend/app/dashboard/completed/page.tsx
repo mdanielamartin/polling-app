@@ -5,6 +5,7 @@ import usePollStore from "../../../store/pollStore";
 import useUserStore from "../../../store/userStore";
 import { useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { toLocalTime } from "../../../utils/timezones";
 
 const CompletePolls = () => {
     const { getPolls, polls, isLoading } = usePollStore()
@@ -83,16 +84,16 @@ const CompletePolls = () => {
                                     {poll.name}
                                 </TableCell>
                                 <TableCell className="text-center text-gray-700 text-sm sm:text-base">
-                                    {poll.created_at}
+                                    {toLocalTime(poll.created_at)}
                                 </TableCell>
                                 <TableCell className="text-center text-gray-700 text-sm sm:text-base">
                                     {poll.time_limit_days}
                                 </TableCell>
                                 <TableCell className="text-center text-gray-700 text-sm sm:text-base">
-                                    {poll.publish_date}
+                                    {toLocalTime(poll.publish_date)}
                                 </TableCell>
                                 <TableCell className="text-center text-gray-700 text-sm sm:text-base">
-                                    {poll.closing_date}
+                                    {toLocalTime(poll.closing_date)}
                                 </TableCell>
                                 <TableCell className="text-center">
                                     <Button onClick={() => router.push(`/dashboard/completed/poll/${poll.id}`)} color="alternative">View Results</Button>
