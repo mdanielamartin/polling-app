@@ -17,3 +17,18 @@ export function getLocalISOWithOffset(date: Date): string {
 
   return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}${sign}${offsetH}:${offsetM}`;
 }
+
+export function toLocalTime (date:string){
+  const localDate = new Date(date)
+
+  const formatter = new Intl.DateTimeFormat(undefined,{
+year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+  hour: '2-digit',
+  minute: '2-digit',
+  })
+
+  return formatter.format(localDate)
+
+}

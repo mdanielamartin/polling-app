@@ -11,15 +11,16 @@ interface UserState {
     token: string | null;
     error: string | null;
     isLoading: boolean;
-    login: (data:loginFormat) => Promise<boolean>;
-    signup: (data:loginFormat) => Promise<boolean>
+    login: (data: loginFormat) => Promise<boolean>;
+    signup: (data: loginFormat) => Promise<boolean>;
+    getUser: () => Promise<user>;
     clearError: () => void
     logout: () => void
 }
-type loginFormat = {email:string,password:string}
+type loginFormat = { email: string, password: string }
 
-
-const useUserStore = create<UserState>((set) => ({
+type user = { email: string, id: number }
+const useUserStore = create<UserState>((set, get) => ({
     token: typeof window !== 'undefined' ? sessionStorage.getItem('token') : null,
     error: null,
     isLoading: false,
@@ -55,7 +56,7 @@ const useUserStore = create<UserState>((set) => ({
     },
 
     logout: () => {
-        set({token:null})
+        set({ token: null })
         sessionStorage.clear()
     },
 
@@ -72,7 +73,7 @@ const useUserStore = create<UserState>((set) => ({
                 const errorData = await res.json()
                 throw new Error(errorData || 'Login failed')
             }
-            set({isLoading: false})
+            set({ isLoading: false })
             return true
         } catch (err: unknown) {
             let message = 'Unexpected error'
@@ -83,6 +84,32 @@ const useUserStore = create<UserState>((set) => ({
             return false
         }
     },
+
+    getUser: async () => {
+        set({ isLoading: true, error: null })
+        const token = get().token
+        try {
+            const res = await fetch(`${backendURL}user`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+            })
+
+            if (!res.ok) {
+                const errorData = await res.json()
+                throw new Error(errorData || 'Login failed')
+            }
+            const user = await res.json()
+
+            set({ isLoading: false })
+            return user
+        } catch (err: unknown) {
+            let message = 'Unexpected error'
+            if (err instanceof Error) {
+                message = err.message
+                set({ error: message, isLoading: false })
+            }
+        }
+    }
 
 
 

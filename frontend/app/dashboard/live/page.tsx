@@ -1,4 +1,3 @@
-
 "use client"
 import { Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, Button, Spinner } from "flowbite-react";
 import usePollStore from "../../../store/pollStore";
@@ -7,8 +6,9 @@ import { useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { toLocalTime } from "../../../utils/timezones";
 
-const CompletePolls = () => {
-    const { getPolls, polls, isLoading } = usePollStore()
+const LivePolls = () => {
+
+    const { polls, getPolls, isLoading } = usePollStore()
     const token = useUserStore.getState().token
     const router = useRouter()
 
@@ -18,12 +18,12 @@ const CompletePolls = () => {
         }
         onLoad()
 
-    }, [getPolls, token])
+    }, [])
 
-    const completePolls = useMemo(() => {
+    const livePolls = useMemo(() => {
         if (polls) {
-            const complete = polls.filter(poll => poll.status == "completed")
-            return complete
+            const live = polls.filter(poll => poll.status == "active")
+            return live
         }
 
         return []
@@ -31,7 +31,7 @@ const CompletePolls = () => {
 
     }, [polls])
 
-    if (isLoading && completePolls.length == 0) {
+    if (isLoading && livePolls.length == 0) {
         return (
             <div className="flex min-h-screen w-full  items-center justify-center m-2">
                 <div>
@@ -42,43 +42,38 @@ const CompletePolls = () => {
         )
     }
 
-    if (!isLoading && completePolls.length == 0) {
+    if (!isLoading && livePolls.length == 0) {
         return (
             <div className="flex min-h-screen w-full  items-center justify-center m-2">
                 <div>
-                    <h4>No polls completed</h4>
+                    <h4>No active polls</h4>
                 </div>
             </div>
         )
     }
+
     return (
-        <div className="flex min-h-screen w-full justify-center px-4 py-2">
-            <div className="w-full overflow-x-auto max-w-6xl">
+        <div className="flex flex-col min-h-screen w-full items-center px-2 py-4">
+            <div className="w-full max-w-7xl overflow-x-auto shadow-lg rounded-lg border border-gray-300">
                 <Table className="w-full shadow-md rounded-md table-auto">
                     <TableHead>
                         <TableRow>
-                            <TableHeadCell className="font-bold text-center text-sm sm:text-base text-black bg-gray-200">
-                                Name
-                            </TableHeadCell>
-                            <TableHeadCell className="font-bold text-center text-sm sm:text-base text-black bg-gray-200">
-                                Creation Date
-                            </TableHeadCell>
-                            <TableHeadCell className="font-bold text-center text-sm sm:text-base text-black bg-gray-200">
-                                Duration
-                            </TableHeadCell>
-                            <TableHeadCell className="font-bold text-center text-sm sm:text-base text-black bg-gray-200">
-                                Launch Date
-                            </TableHeadCell>
-                            <TableHeadCell className="font-bold text-center text-sm sm:text-base text-black bg-gray-200">
-                                Expiration Date
-                            </TableHeadCell>
-                            <TableHeadCell className="font-bold text-center text-sm sm:text-base text-black bg-gray-200">
-                                <span className="sr-only">Actions</span>
+                            {["Name", "Creation Date", "Publish Date", "Closing Date", "Duration"].map((heading) => (
+                                <TableHeadCell
+                                    key={heading}
+                                    className="font-bold text-center text-sm sm:text-base text-black bg-gray-200"
+                                >
+                                    {heading}
+                                </TableHeadCell>
+                            ))}
+                            <TableHeadCell className="bg-gray-200">
+                                <span className="sr-only bg-gray-200">Actions</span>
                             </TableHeadCell>
                         </TableRow>
                     </TableHead>
-                    <TableBody className="divide-y">
-                        {completePolls?.map((poll) => (
+
+                    <TableBody className="divide-y divide-gray-300">
+                        {livePolls?.map((poll) => (
                             <TableRow key={poll.id} className="bg-white hover:bg-gray-100 transition-colors">
                                 <TableCell className="whitespace-nowrap text-center text-sm sm:text-base text-black">
                                     {poll.name}
@@ -87,16 +82,16 @@ const CompletePolls = () => {
                                     {toLocalTime(poll.created_at)}
                                 </TableCell>
                                 <TableCell className="text-center text-gray-700 text-sm sm:text-base">
-                                    {poll.time_limit_days}
-                                </TableCell>
-                                <TableCell className="text-center text-gray-700 text-sm sm:text-base">
                                     {toLocalTime(poll.publish_date)}
                                 </TableCell>
                                 <TableCell className="text-center text-gray-700 text-sm sm:text-base">
                                     {toLocalTime(poll.closing_date)}
                                 </TableCell>
-                                <TableCell className="text-center">
-                                    <Button onClick={() => router.push(`/dashboard/completed/poll/${poll.id}`)} color="alternative">View Results</Button>
+                                <TableCell className="text-center text-gray-700 text-sm sm:text-base">
+                                    {poll.time_limit_days}
+                                </TableCell>
+                                <TableCell className="text-center text-gray-700 text-sm sm:text-base">
+                                    <Button onClick={() => router.push(`/dashboard/live/poll/${poll.id}`)} color="alternative">View Results</Button>
                                 </TableCell>
                             </TableRow>
                         ))}
@@ -107,4 +102,4 @@ const CompletePolls = () => {
     );
 }
 
-export default CompletePolls
+export default LivePolls

@@ -15,12 +15,18 @@ jwt = JWTManager(app)
 set_commands(app)
 CORS(app)
 
-def close_expired_polls():
-    expired_polls = Poll.query.filter(Poll.closing_date <= datetime.now(timezone.utc), Poll.status == "active").all()
 
-    for poll in expired_polls:
-        poll.status = "completed"
+def close_expired_polls():
+    with app.app_context():
+        expired_polls = Poll.query.filter(
+            Poll.closing_date <= datetime.now(timezone.utc),
+            Poll.status == "active"
+        ).all()
+
+        for poll in expired_polls:
+            poll.status = "completed"
         db.session.commit()
+
 
 scheduler = BackgroundScheduler()
 scheduler.add_job(close_expired_polls, "cron", hour=23, minute=59)

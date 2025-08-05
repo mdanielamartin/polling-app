@@ -8,23 +8,24 @@ interface ChoiceState {
     error: string | null;
     isLoading: boolean;
     choices: Choice[];
-    addChoice: (data:ChoiceData, token:string, poll_id:number) => Promise<void>;
-    updateChoice: (data:Choice, token:string, poll_id:number) => Promise<void>;
-    deleteChoice: (choice_id:number, token:string, poll_id:number) => Promise<void>;
-    getChoices: (poll_id:number,token:string) => Promise<void>;
+    addChoice: (data: ChoiceData, token: string, poll_id: number) => Promise<void>;
+    updateChoice: (data: Choice, token: string, poll_id: number) => Promise<void>;
+    deleteChoice: (choice_id: number, token: string, poll_id: number) => Promise<void>;
+    getChoices: (poll_id: number, token: string) => Promise<void>;
+    setChoices: (data: Choice[]) => void;
     clearError: () => void;
 
 }
 
 interface Choice {
-  id: number | null;
-  name: string | null;
-  description: string | null;
+    id: number | null;
+    name: string | null;
+    description: string | null;
 }
 
 interface ChoiceData {
-  name: string | null;
-  description: string | null;
+    name: string | null;
+    description: string | null;
 }
 
 type ErrorResponse = { error: string }
@@ -34,7 +35,7 @@ const useChoiceStore = create<ChoiceState>((set) => ({
     isLoading: false,
     choices: [],
 
-    addChoice: async (data: ChoiceData, token: string, poll_id:number) => {
+    addChoice: async (data: ChoiceData, token: string, poll_id: number) => {
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}poll/${poll_id}/add/choice`, {
@@ -49,7 +50,7 @@ const useChoiceStore = create<ChoiceState>((set) => ({
             }
 
             const choice = await res.json()
-            set((state) => ({isLoading: false, choices: [...state.choices,choice]}))
+            set((state) => ({ isLoading: false, choices: [...state.choices, choice] }))
         } catch (err: unknown) {
             let message = 'Unexpected error'
             if (err instanceof Error) {
@@ -62,7 +63,7 @@ const useChoiceStore = create<ChoiceState>((set) => ({
     },
 
 
-    updateChoice: async (data: Choice, token: string, poll_id:number) => {
+    updateChoice: async (data: Choice, token: string, poll_id: number) => {
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}poll/${poll_id}/update/choice`, {
@@ -78,8 +79,10 @@ const useChoiceStore = create<ChoiceState>((set) => ({
 
             const updated_choice = await res.json()
 
-            set((state)=>({isLoading:false, choices: state.choices.map((c)=>
-            c.id === updated_choice.id ? {...c,...updated_choice}:c)}))
+            set((state) => ({
+                isLoading: false, choices: state.choices.map((c) =>
+                    c.id === updated_choice.id ? { ...c, ...updated_choice } : c)
+            }))
 
         } catch (err: unknown) {
             let message = 'Unexpected error'
@@ -92,7 +95,7 @@ const useChoiceStore = create<ChoiceState>((set) => ({
         }
     },
 
-    deleteChoice: async (choice_id: number, token: string, poll_id:number) => {
+    deleteChoice: async (choice_id: number, token: string, poll_id: number) => {
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}poll/${poll_id}/delete/choice/${choice_id}`, {
@@ -105,8 +108,10 @@ const useChoiceStore = create<ChoiceState>((set) => ({
                 throw new Error(errorData || 'Login failed')
             }
 
-            set((state)=>({isLoading:false, choices: state.choices.filter((c)=>
-            c.id !== choice_id)}))
+            set((state) => ({
+                isLoading: false, choices: state.choices.filter((c) =>
+                    c.id !== choice_id)
+            }))
 
         } catch (err: unknown) {
             let message = 'Unexpected error'
@@ -119,7 +124,7 @@ const useChoiceStore = create<ChoiceState>((set) => ({
         }
     },
 
-    getChoices: async ( poll_id: number,token: string) => {
+    getChoices: async (poll_id: number, token: string) => {
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}poll/${poll_id}`, {
@@ -137,8 +142,6 @@ const useChoiceStore = create<ChoiceState>((set) => ({
             let message = 'Unexpected error'
             if (err instanceof Error) {
                 message = err.message
-            } else if (typeof err === 'object' && err !== null && 'error' in err) {
-                message = (err as ErrorResponse).error
             }
             set({ error: message, isLoading: false })
         }
@@ -146,8 +149,8 @@ const useChoiceStore = create<ChoiceState>((set) => ({
     clearError: () => {
         set({ error: null })
     },
-    setChoices: (choices: Choice[]) =>{
-        set({ choices:choices})
+    setChoices: (choices: Choice[]) => {
+        set({ choices: choices })
     }
 }));
 

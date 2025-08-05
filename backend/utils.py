@@ -44,7 +44,7 @@ def send_token_email(email,token, expiration_date,timezone, poll_name):
   <h2 style="color: #333;">{poll_name}</h2>
   <p>You’ve been invited to participate in a poll. Please click the link below to cast your vote:</p>
   <p><a href="{poll_link}" style="color: #007BFF; text-decoration: none;">Launch Poll</a></p>
-  <p><strong>Closing time:</strong> {expiration_date.strftime("%a, %d %b %Y %H:%M:%S")} ({timezone})</p>
+  <p><strong>Closing time:</strong> {expiration_date.strftime("%a, %d %b %Y %H:%M")} ({timezone})</p>
   <p>Make sure to cast your vote before the deadline to ensure it’s counted.</p>
   <hr>
   <p style="font-size: 0.9em; color: #666;">If you weren’t expecting this invitation, feel free to ignore this message.</p>

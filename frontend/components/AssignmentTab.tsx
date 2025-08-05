@@ -12,23 +12,23 @@ const AssignmentTab = () => {
 
     const [newAssigments, setNewAssignments] = useState([])
     const [deleteAssignments, setDeleteAssignments] = useState([])
-    const [unassigned,setUnassigned] = useState([])
+    const [unassigned, setUnassigned] = useState([])
     const [listIds, setListIds] = useState<number[]>([])
     const params = useParams()
     const slug = Number(params.slug)
 
-    const {token} = useUserStore()
-    const {getContacts, contacts} = useContactStore()
-    const {getAssignments, assignments, addAssignments, removeAssignments} = useAssignStore()
-    const {getLists,lists} = useListStore()
-    const {activatePoll} = usePollStore()
+    const { token } = useUserStore()
+    const { getContacts, contacts } = useContactStore()
+    const { getAssignments, assignments, addAssignments, removeAssignments } = useAssignStore()
+    const { getLists, lists } = useListStore()
+    const { activatePoll } = usePollStore()
 
-    const launchPoll = async (id:number)=>{
+    const launchPoll = async (id: number) => {
         const localNow = new Date();
         const utcNow = localNow.toISOString()
         const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
-        await activatePoll(id,utcNow,timezone,token)
-}
+        await activatePoll(id, utcNow, timezone, token)
+    }
     interface ContactData {
         id: number,
         email: string
@@ -46,69 +46,67 @@ const AssignmentTab = () => {
     }
 
     const handleDeleteCheckAll = () => {
-        setDeleteAssignments(deleteAssignments.length === assignments.length ? [] : assignments.map((a)=>a.id))
+        setDeleteAssignments(deleteAssignments.length === assignments.length ? [] : assignments.map((a) => a.id))
     }
 
     const handleCheckAll = () => {
-        setNewAssignments(newAssigments.length === unassigned.length ? [] : unassigned.map((c)=>c.id))
-        setListIds(newAssigments.length === unassigned.length ? [] : lists.map((l)=>l.id))
+        setNewAssignments(newAssigments.length === unassigned.length ? [] : unassigned.map((c) => c.id))
+        setListIds(newAssigments.length === unassigned.length ? [] : lists.map((l) => l.id))
     }
 
 
-    const handleListSelection = (id:number) =>{
+    const handleListSelection = (id: number) => {
         setListIds(prev =>
             prev.some(c => c === id) ? prev.filter(c => c !== id) : [...prev, id]
         )
     }
 
-    const updateSelection = ()=>{
+    const updateSelection = () => {
         const selectedPolleeIds = new Set();
         for (const id of listIds) {
-        const list = lists.find(l => l.id === id);
-        if (list) {
-            for (const pollee of list.pollees) {
-                selectedPolleeIds.add(pollee.id);
+            const list = lists.find(l => l.id === id);
+            if (list) {
+                for (const pollee of list.pollees) {
+                    selectedPolleeIds.add(pollee.id);
+                }
             }
         }
+        const merged = Array.from(new Set([...selectedPolleeIds, ...newAssigments]))
+        setNewAssignments(merged)
     }
-    const merged = Array.from(new Set([...selectedPolleeIds,...newAssigments]))
-    setNewAssignments(merged)
-    }
-
-
 
     const onLoad = async () => {
         await getContacts(token)
-        await getAssignments(token,slug)
+        await getAssignments(token, slug)
         await getLists(token)
     }
-    const handleAssignButton = async ()=>{
-        await addAssignments(newAssigments,token,slug)
+    const handleAssignButton = async () => {
+        await addAssignments(newAssigments, token, slug)
         setNewAssignments([])
         setListIds([])
     }
 
-    const handleDeleteButton = async ()=>{
-        await removeAssignments(deleteAssignments,token,slug)
+    const handleDeleteButton = async () => {
+        await removeAssignments(deleteAssignments, token, slug)
         setDeleteAssignments([])
     }
 
 
     useEffect(() => {
         onLoad()
-    },[])
+    }, [])
 
     useEffect(() => {
 
-        if (assignments.length>0){
+        if (assignments.length > 0) {
             const assignedIDs = new Set(assignments.map((a) => a.pollee_id))
             setUnassigned(contacts.filter(contact => !assignedIDs.has(contact.id)))
-        }else{
+        } else {
             setUnassigned(contacts)
         }
         updateSelection()
 
-    }, [assignments,contacts,listIds])
+    }, [assignments, contacts, listIds])
 
     return (
 
@@ -117,13 +115,13 @@ const AssignmentTab = () => {
                 <div className="grid grid-cols-1">
                     <div className=" flex  place-content-center space-x-4 mb-4">
                         <Dropdown color="light" label="Assign Contact List to Poll" value={4} className="w-full max-w-xs overflow-y-auto shadow-sm sm:text-sm text-xs" dismissOnClick={true}>
-                            {lists?.map(list =>(
+                            {lists?.map(list => (
                                 <DropdownItem key={list.id} className="bg-gray-50 hover:bg-gray-100"><Checkbox className="mr-2"
-                                checked={listIds.some(c=> c===list.id)}
-                                onChange={()=>handleListSelection(list.id)}/>{list.name}</DropdownItem>
+                                    checked={listIds.some(c => c === list.id)}
+                                    onChange={() => handleListSelection(list.id)} />{list.name}</DropdownItem>
                             ))}
                         </Dropdown>
-                        <Button color="cyan" className="w-full max-w-xs py-3 shadow hover:shadow-lg sm:text-sm text-xs " onClick={()=>handleAssignButton()}>Assign Selection to Poll</Button>
+                        <Button color="cyan" className="w-full max-w-xs py-3 shadow hover:shadow-lg sm:text-sm text-xs " onClick={() => handleAssignButton()}>Assign Selection to Poll</Button>
                     </div>
                     <div>
                         <Table className="w-full shadow-md rounded-md table-auto">
@@ -158,8 +156,8 @@ const AssignmentTab = () => {
             <TabItem title="Pollees">
                 <div className="grid grid-cols-1">
                     <div className="flex  place-content-center space-x-4 mb-4">
-                        <Button color="red" className="w-full max-w-xs py-3 shadow hover:shadow-lg sm:text-sm text-xs" onClick={()=>handleDeleteButton()}>Remove Selection</Button>
-                        <Button color="cyan" className="w-full max-w-xs py-3 shadow hover:shadow-lg sm:text-sm text-xs" onClick={()=>launchPoll(slug)}>Launch Poll</Button>
+                        <Button color="red" className="w-full max-w-xs py-3 shadow hover:shadow-lg sm:text-sm text-xs" onClick={() => handleDeleteButton()}>Remove Selection</Button>
+                        <Button color="cyan" className="w-full max-w-xs py-3 shadow hover:shadow-lg sm:text-sm text-xs" onClick={() => launchPoll(slug)}>Launch Poll</Button>
                     </div>
                     <div>
                         <Table className="w-full shadow-md rounded-md table-auto">

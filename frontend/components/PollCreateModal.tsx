@@ -14,10 +14,11 @@ import { MdOutlineAddchart } from "react-icons/md";
 const PollCreateModal = () => {
     const [openModal, setOpenModal] = useState(false);
     const [selectedDay, setSelectedDay] = useState(0)
+    const [id, setId] = useState(null)
     const days = [...Array(30)].map((_, i) => i + 1)
 
     const router = useRouter()
-    const { createPoll, error, poll } = usePollStore()
+    const { createPoll, error } = usePollStore()
     const { token } = useUserStore()
 
     function onCloseModal() {
@@ -41,17 +42,20 @@ const PollCreateModal = () => {
     const { register, setValue, reset, handleSubmit, formState: { errors } } = useForm({ resolver: yupResolver(pollSchema) })
 
     const onSubmit = async (data: FormData) => {
-        await createPoll(data, token)
+        const pollId = await createPoll(data, token)
+        if (pollId) {
+            setId(pollId)
+        }
     }
 
     useEffect(() => {
         if (error) {
             showPollError(error)
         }
-        if (poll.id) {
-            router.push(`dashboard/edit/poll/${poll.id}`)
+        if (id) {
+            router.push(`dashboard/edit/poll/${id}`)
         }
-    }, [error, poll, router])
+    }, [error, id, router])
 
     useEffect(() => {
         if (selectedDay !== null) {
