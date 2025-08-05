@@ -43,7 +43,7 @@ const SignUp = ()=> {
   return (
     <div className="flex h-screen items-center justify-center">
 
-    <form onSubmit={handleSubmit(onSubmit)} className="flex max-w-md max-w-lg w-full p-6 flex-col gap-4">
+    <form onSubmit={handleSubmit(onSubmit)} className="flex max-w-md  w-full p-6 flex-col gap-4">
          <h1 className="font-bold text-2xl text-center">REGISTER</h1>
       <div>
         <div className="mb-2 block">
