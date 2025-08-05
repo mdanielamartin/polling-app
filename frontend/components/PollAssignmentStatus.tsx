@@ -4,18 +4,21 @@ import { useParams } from "next/navigation"
 import { useEffect, useState } from "react"
 import useAssignStore from "../store/assignStore"
 import useUserStore from "../store/userStore"
+import { activationStatus } from "../utils/alerts"
 
 
 const PollAssignmentStatus = () => {
     const [resends, setResends] = useState([])
+    const [result, setResults] = useState("")
     const params = useParams()
     const slug = Number(params.slug)
     const { token } = useUserStore()
-    const { assignments, getAssignments, resendAssignments } = useAssignStore()
+    const { assignments, getAssignments, resendAssignments, activation } = useAssignStore()
 
     const resend = async (id: number[]) => {
         const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
-        await resendAssignments(id, slug, timezone, token)
+        const res = await resendAssignments(id, slug, timezone, token)
+        setResults(res)
     }
 
     const handleCheck = (id: number) => {
@@ -36,6 +39,12 @@ const PollAssignmentStatus = () => {
         onLoad()
     }, [])
 
+    useEffect(() => {
+        if (activation && result) {
+            activationStatus(result)
+        }
+    }, [activation, result])
+
 
 
     return (
@@ -50,7 +59,6 @@ const PollAssignmentStatus = () => {
                             <Checkbox checked={resends.length === assignments.length} onChange={() => handleCheckAll()} />
                         </TableHeadCell>
                         <TableHeadCell className="font-bold text-center text-sm sm:text-base text-black bg-gray-200">EMAIL</TableHeadCell>
-                        <TableHeadCell className="font-bold text-center text-sm sm:text-base text-black bg-gray-200">Status</TableHeadCell>
                         <TableHeadCell className="bg-gray-200">
                             <span className="sr-only bg-gray-200">Actions</span>
                         </TableHeadCell>
@@ -67,9 +75,7 @@ const PollAssignmentStatus = () => {
                                 <TableCell className="whitespace-nowrap font-normal text-md text-start text-gray-700 ">
                                     {contact.email}
                                 </TableCell>
-                                <TableCell className="whitespace-nowrap font-normal text-md text-start text-gray-700 ">
-                                    {contact.status ? "Sent" : "Error"}
-                                </TableCell>
+
                                 <TableCell className="whitespace-nowrap font-normal text-md text-start text-gray-700 ">
                                     <Button onClick={() => resend([contact.id])} color="alternative">Resend Invite</Button>
                                 </TableCell>

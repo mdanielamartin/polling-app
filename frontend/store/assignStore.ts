@@ -13,6 +13,7 @@ interface AssigmentState {
     getAssignments: (token: string, pollId: number) => Promise<void>;
     resendAssignments: (tids: number[], pollId: number, tz: string, token: string) => Promise<string>;
     clearError: () => void;
+    clearActivation: () => void;
 
 }
 

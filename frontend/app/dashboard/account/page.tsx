@@ -1,3 +1,4 @@
+"use client"
 import useUserStore from "../../../store/userStore"
 import { useState, useEffect } from "react"
 

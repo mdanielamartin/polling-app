@@ -2,6 +2,7 @@ import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css'
 import useUserStore from '../store/userStore';
 import usePollStore from '../store/pollStore';
+import useAssignStore from '../store/assignStore';
 
 
 export const showLoginError = (message: string) => {
@@ -66,12 +67,12 @@ export const voteError = (): void => {
 
 
 export const activationStatus = (message: string): void => {
-  const clearError = usePollStore.getState().clearError
+  const clearActivation = useAssignStore.getState().clearActivation
   Swal.fire({
     icon: "info",
     title: 'Poll Activation Status',
     text: message,
     confirmButtonColor: ' #FF6C40',
-    confirmButtonText: 'Retry',
-  }).then(() => clearError());
+    confirmButtonText: 'Accept',
+  }).then(() => clearActivation());
 };

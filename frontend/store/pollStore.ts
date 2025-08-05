@@ -193,8 +193,6 @@ const usePollStore = create<PollState>((set) => ({
             let message = 'Unexpected error'
             if (err instanceof Error) {
                 message = err.message
-            } else if (typeof err === 'object' && err !== null && 'error' in err) {
-                message = (err as ErrorResponse).error
             }
             set({ error: message, isLoading: false })
         }
@@ -230,8 +228,6 @@ const usePollStore = create<PollState>((set) => ({
 
 
     },
-
-
     getResults: async (pollId: number, token: string) => {
         set({ isLoading: true, error: null })
         try {
@@ -251,8 +247,6 @@ const usePollStore = create<PollState>((set) => ({
             let message = 'Unexpected error'
             if (err instanceof Error) {
                 message = err.message
-            } else if (typeof err === 'object' && err !== null && 'error' in err) {
-                message = (err as ErrorResponse).error
             }
             set({ error: message, isLoading: false })
         }

@@ -1,6 +1,7 @@
 "use client";
 import { List, ListItem } from "flowbite-react"
 import usePollStore from "../store/pollStore";
+import { toLocalTime } from "../utils/timezones";
 
 const PollCard = () => {
 
@@ -16,13 +17,13 @@ const PollCard = () => {
 
             <section className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 text-gray-500 text-sm">
                 <div>
-                    <span className="font-semibold text-gray-700">Created:</span> {poll.created_at}
+                    <span className="font-semibold text-gray-700">Created:</span> {toLocalTime(poll.created_at)}
                 </div>
                 <div>
-                    <span className="font-semibold text-gray-700">Published:</span> {poll.publish_date}
+                    <span className="font-semibold text-gray-700">Published:</span> {toLocalTime(poll.publish_date)}
                 </div>
                 <div>
-                    <span className="font-semibold text-gray-700">Closes:</span> {poll.closing_date}
+                    <span className="font-semibold text-gray-700">Closes:</span> {toLocalTime(poll.closing_date)}
                 </div>
             </section>
 

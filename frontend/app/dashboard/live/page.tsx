@@ -4,6 +4,7 @@ import usePollStore from "../../../store/pollStore";
 import useUserStore from "../../../store/userStore";
 import { useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { toLocalTime } from "../../../utils/timezones";
 
 const LivePolls = () => {
 
@@ -78,13 +79,13 @@ const LivePolls = () => {
                                     {poll.name}
                                 </TableCell>
                                 <TableCell className="text-center text-gray-700 text-sm sm:text-base">
-                                    {poll.created_at}
+                                    {toLocalTime(poll.created_at)}
                                 </TableCell>
                                 <TableCell className="text-center text-gray-700 text-sm sm:text-base">
-                                    {poll.publish_date}
+                                    {toLocalTime(poll.publish_date)}
                                 </TableCell>
                                 <TableCell className="text-center text-gray-700 text-sm sm:text-base">
-                                    {poll.closing_date}
+                                    {toLocalTime(poll.closing_date)}
                                 </TableCell>
                                 <TableCell className="text-center text-gray-700 text-sm sm:text-base">
                                     {poll.time_limit_days}
