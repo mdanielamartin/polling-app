@@ -16,10 +16,15 @@ interface UserState {
     getUser: () => Promise<user>;
     clearError: () => void
     logout: () => void
+    passwordChangeRequest: (data:email) => Promise<boolean>
+    validateRequestToken: (token:string) => Promise<boolean>
+    resetPassword: (data:password) => Promise<boolean>
 }
 type loginFormat = { email: string, password: string }
 
 type user = { email: string, id: number }
+type email = { email: string }
+type password = { password: string }
 const useUserStore = create<UserState>((set, get) => ({
     token: typeof window !== 'undefined' ? sessionStorage.getItem('token') : null,
     error: null,
@@ -108,6 +113,85 @@ const useUserStore = create<UserState>((set, get) => ({
                 message = err.message
                 set({ error: message, isLoading: false })
             }
+        }
+    },
+
+
+    passwordChangeRequest: async (data:email) => {
+        set({ isLoading: true, error: null })
+        try {
+            const res = await fetch(`${backendURL}reset-password/send-email`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            })
+
+            if (!res.ok) {
+                const errorData = await res.json()
+                throw new Error(errorData || 'Request failed')
+            }
+            set({ isLoading: false })
+            return true
+        } catch (err: unknown) {
+            let message = 'Unexpected error'
+            if (err instanceof Error) {
+                message = err.message
+                set({ error: message, isLoading: false })
+            }
+            return true
+        }
+    },
+
+
+    validateRequestToken: async (token: string) => {
+        set({ isLoading: true, error: null })
+        try {
+            const res = await fetch(`${backendURL}reset-password`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json', "Authorization": `Bearer ${token}` },
+            })
+
+            if (!res.ok) {
+                const errorData = await res.json()
+                throw new Error(errorData || 'Request failed')
+            }
+            set({ isLoading: false })
+            sessionStorage.setItem("reset-password", token)
+            return true
+        } catch (err: unknown) {
+            let message = 'Unexpected error'
+            if (err instanceof Error) {
+                message = err.message
+                set({ error: message, isLoading: false })
+            }
+            return false
+        }
+    },
+
+
+    resetPassword: async (data:password) => {
+        set({ isLoading: true, error: null })
+        const token = sessionStorage.getItem("reset-password")
+        try {
+            const res = await fetch(`${backendURL}reset-password`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json',  "Authorization": `Bearer ${token}` },
+                body: JSON.stringify(data)
+            })
+
+            if (!res.ok) {
+                const errorData = await res.json()
+                throw new Error(errorData || 'Request failed')
+            }
+            set({ isLoading: false })
+            return true
+        } catch (err: unknown) {
+            let message = 'Unexpected error'
+            if (err instanceof Error) {
+                message = err.message
+                set({ error: message, isLoading: false })
+            }
+            return false
         }
     }
 
