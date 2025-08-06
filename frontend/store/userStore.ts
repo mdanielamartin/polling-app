@@ -16,10 +16,15 @@ interface UserState {
     getUser: () => Promise<user>;
     clearError: () => void
     logout: () => void
+    passwordChangeRequest: (data:email) => Promise<boolean>
+    validateRequestToken: (token:string) => Promise<boolean>
+    resetPassword: (data:password) => Promise<boolean>
 }
 type loginFormat = { email: string, password: string }
 
 type user = { email: string, id: number }
+type email = { email: string }
+type password = { password: string }
 const useUserStore = create<UserState>((set, get) => ({
     token: typeof window !== 'undefined' ? sessionStorage.getItem('token') : null,
     error: null,
@@ -112,12 +117,13 @@ const useUserStore = create<UserState>((set, get) => ({
     },
 
 
-    passwordChangeRequest: async () => {
+    passwordChangeRequest: async (data:email) => {
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}reset-password/send-email`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
             })
 
             if (!res.ok) {
@@ -163,7 +169,7 @@ const useUserStore = create<UserState>((set, get) => ({
     },
 
 
-    resetPassword: async (data:string) => {
+    resetPassword: async (data:password) => {
         set({ isLoading: true, error: null })
         const token = sessionStorage.getItem("reset-password")
         try {
