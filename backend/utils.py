@@ -57,10 +57,38 @@ def send_token_email(email,token, expiration_date,timezone, poll_name):
     }
     result = mailjet.send.create(data=data)
     if result.status_code not in [200,201]:
-        return (email)
-    return  ("")
+        return email
+    return  False
 
 def generate_url(pollee_id,poll_id,closing_date,publish_date):
     expiration_time = closing_date - publish_date
     access_token = create_access_token(identity=str(poll_id),additional_claims={"pollee_id": pollee_id}, expires_delta=expiration_time)
     return access_token
+
+
+def send_reset_email(to_email,token):
+    reset_link = f'{FRONTEND_URL}password/change?token={token}'
+    api_key = KEY
+    api_secret = SECRET
+    mailjet = Client(auth=(api_key, api_secret), version='v3.1')
+    data = {
+      'Messages': [
+        {
+          "From": {
+            "Email": "mdaniela.martin@proton.me",
+            "Name": "Polling App"
+          },
+          "To": [
+            {
+              "Email": to_email,
+              "Name": to_email
+            }
+          ],
+          "Subject": "Password Change Requested",
+          "TextPart": f"Click on the following link to reset your password: {reset_link}",
+          "HTMLPart": f"<div><p>We have received a password change request.</p><p>Click the following link: <a href='{reset_link}'>Change password</a></p><p>The link will expire in 10 minutes</p></div>"
+        }
+      ]
+    }
+    result = mailjet.send.create(data=data)
+    return (result.status_code)

@@ -118,7 +118,7 @@ class PollAssignment(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     poll_id = db.Column(db.Integer, db.ForeignKey('poll.id'), nullable=False)
     pollee_id = db.Column(db.Integer, db.ForeignKey('pollee.id'), nullable=False)
-    status = db.Column(db.Boolean, default="False", nullable=True)
+    status = db.Column(db.Boolean, default=False, nullable=True)
     poll = db.relationship("Poll", back_populates="assignments")
     pollee = db.relationship("Pollee", back_populates = "assignments", lazy="joined")
 

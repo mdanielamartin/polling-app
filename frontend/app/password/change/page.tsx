@@ -1,6 +1,7 @@
 "use client"
+export const dynamic  = "force-dynamic"
 import { Button,Label, Spinner, TextInput } from "flowbite-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState} from "react";
 import { useForm } from "react-hook-form";
 import { useRouter, useSearchParams } from 'next/navigation'
 import * as yup from "yup"
