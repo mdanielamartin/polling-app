@@ -71,7 +71,7 @@ const useUserStore = create<UserState>((set, get) => ({
             const res = await fetch(`${backendURL}user/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(registerData),
+                body: JSON.stringify({email:registerData.email, password:registerData.password}),
             })
 
             if (!res.ok) {

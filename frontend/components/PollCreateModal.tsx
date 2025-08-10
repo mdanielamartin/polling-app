@@ -69,12 +69,12 @@ const PollCreateModal = () => {
             <Button
                 color="alternative"
                 onClick={() => setOpenModal(true)}
-                className="h-35 rounded-2xl bg-stone-50 text-gray-100 flex flex-col items-center justify-center cursor-pointer shadow-md group hover:bg-gray-100 hover:text-blue-700 transition-colors"
+                className="h-35 rounded-2xl bg-stone-50 text-gray-100 flex flex-col items-center justify-center cursor-pointer shadow-md group hover:bg-gray-100 hover:text-cyan-700 transition-colors"
             >
-                <h1 className="font-bold text-2xl text-center group-hover:text-blue-700 transition-colors">
+                <h1 className="font-bold text-2xl text-center group-hover:text-cyan-700 transition-colors">
                     New Poll
                 </h1>
-                <div className="block p-5 group-hover:text-blue-700 transition-colors">
+                <div className="block p-5 group-hover:text-cyan-700 transition-colors">
                     <MdOutlineAddchart className="text-5xl" />
                 </div>
             </Button>

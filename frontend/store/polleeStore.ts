@@ -10,9 +10,11 @@ interface PolleeState {
     poll: Poll;
     complete: boolean;
     status:number;
+    token:string;
     getPoll: (token:string) => Promise<void>;
     castVote: (data:Vote, token:string) => Promise<boolean>;
     clearError: () => void;
+    refreshPoll: () => void;
 
 }
 
@@ -44,6 +46,7 @@ const usePolleeStore = create<PolleeState>((set) => ({
     complete: false,
     poll: {id:null,name:null,description:null, choices:[]},
     status: null,
+    token:null,
 
     getPoll: async ( token: string) => {
         set({ isLoading: true, error: null })
@@ -62,7 +65,7 @@ const usePolleeStore = create<PolleeState>((set) => ({
             const poll = await res.json()
             sessionStorage.setItem('vote', token)
             sessionStorage.setItem("poll",JSON.stringify(poll))
-            set({isLoading: false, poll: poll, status:200})
+            set({isLoading: false, poll: poll, status:200, token:token})
         } catch (err) {
             set({  isLoading: false})
         }
@@ -98,6 +101,17 @@ const usePolleeStore = create<PolleeState>((set) => ({
     clearError: () => {
         set({ error: null })
     },
+
+    refreshPoll: () => {
+
+        const token = sessionStorage.getItem("vote")
+        const poll = JSON.parse(sessionStorage.getItem("poll"))
+
+        if (!token || !poll){
+             set({isLoading:false, complete:false})
+        }
+        set({isLoading: false, poll: poll, status:200, token:token})
+    }
 
 }));
 

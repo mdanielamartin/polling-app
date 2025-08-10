@@ -1,44 +1,31 @@
 "use client"
 import { List, ListItem, Radio, Button } from "flowbite-react";
-
 import 'sweetalert2/dist/sweetalert2.min.css'
 import usePolleeStore from "../../../../store/polleeStore";
-import { useState } from "react";
+import { useState, useEffect} from "react";
 import { noSelectionWarning, voteError } from "../../../../utils/alerts";
 import { useRouter } from "next/navigation";
 
-
-
 const VotePage = () => {
     const [selection, setSelection] = useState(null)
-    const { castVote } = usePolleeStore()
-    const pollInfo = sessionStorage.getItem("poll")
-    const [displayPoll] = useState(pollInfo ? JSON.parse(pollInfo) : { id: null, name: null, description: "", choices: [] })
+    const { castVote, token, poll , refreshPoll} = usePolleeStore()
+    const [displayPoll] = useState(poll ? poll: { id: null, name: null, description: "", choices: [] })
     const router = useRouter()
 
     const voteButton = async () => {
-        const token = sessionStorage.getItem("vote")
-
         if (token) {
             if (selection) {
-
                 const result = await castVote(selection, token)
                 if (result) {
                     router.push("/verify/poll/vote/success");
                 }
                 else if (!result) {
-
                     voteError()
-
                 }
             }
-
         } else {
             noSelectionWarning()
-
             voteError()
-
-
         }
     }
 
@@ -47,6 +34,11 @@ const VotePage = () => {
         name: string;
         description: string | null;
     }
+
+    useEffect(()=>{
+        refreshPoll()
+    },[refreshPoll])
+
     return (
 
         <div className="flex flex-col items-center justify-center px-4 py-6 sm:px-6 lg:px-8">

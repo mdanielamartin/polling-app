@@ -1,7 +1,6 @@
 
 "use client"
-import { Button, Checkbox, Label, TextInput } from "flowbite-react";
-import Link from "next/link";
+import { Button, Spinner, Label, TextInput } from "flowbite-react";
 import { useForm } from "react-hook-form";
 import { useRouter } from 'next/navigation'
 import * as yup from "yup"
@@ -11,7 +10,7 @@ import { showRegistrationError } from "../../utils/alerts";
 import { useEffect } from "react";
 
 const SignUp = ()=> {
-    const {signup,error} = useUserStore()
+    const {signup,error,isLoading} = useUserStore()
     const router = useRouter()
     const signupSchema = yup.object().shape({
 
@@ -40,11 +39,20 @@ const SignUp = ()=> {
       }
   },[error])
 
+  if (isLoading){
+
+    return (
+ <div className="flex h-screen items-center justify-center">
+    <Spinner color="cyan"/>
+ </div>
+
+    )
+  }
   return (
     <div className="flex h-screen items-center justify-center">
 
-    <form onSubmit={handleSubmit(onSubmit)} className="flex max-w-md  w-full p-6 flex-col gap-4">
-         <h1 className="font-bold text-2xl text-center">REGISTER</h1>
+    <form onSubmit={handleSubmit(onSubmit)} className="flex max-w-md  w-full  flex-col gap-4  rounded-2xl py-10 px-8 bg-gray-50 shadow-2xl">
+         <h1 className="text-4xl text-center font-extrabold mb-4 text-cyan-700 ">REGISTER</h1>
       <div>
         <div className="mb-2 block">
           <Label htmlFor="email2">Your email</Label>
@@ -57,26 +65,17 @@ const SignUp = ()=> {
         <div className="mb-2 block">
           <Label htmlFor="password2">Your password</Label>
         </div>
-        <TextInput id="password2" type="password" required shadow {...register("password")}/>
+        <TextInput id="password2" type="password" placeholder="Must be at least 8 characters long..."required shadow {...register("password")}/>
         <p className="text-red-500">{errors.password?.message}</p>
       </div>
       <div>
         <div className="mb-2 block">
           <Label htmlFor="repeat-password">Repeat password</Label>
         </div>
-        <TextInput id="repeat-password" type="password" required shadow {...register("passwordConfirm")} />
+        <TextInput id="repeat-password" type="password" placeholder="Passwords must match" required shadow {...register("passwordConfirm")} />
         <p className="text-red-500">{errors.passwordConfirm?.message}</p>
       </div>
-      <div className="flex items-center gap-2">
-        <Checkbox id="agree" />
-        <Label htmlFor="agree" className="flex">
-          I agree with the&nbsp;
-          <Link href="#" className="text-cyan-600 hover:underline dark:text-cyan-500">
-            terms and conditions
-          </Link>
-        </Label>
-      </div>
-      <Button type="submit">Register new account</Button>
+      <Button type="submit" color="cyan" className="font-bold">SIGNUP</Button>
     </form>
     </div>
   );
