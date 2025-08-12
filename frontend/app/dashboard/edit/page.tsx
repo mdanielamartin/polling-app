@@ -1,10 +1,11 @@
 "use client"
-import { Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, Button, ButtonGroup, Spinner } from "flowbite-react";
+import { Table, TableBody, TableCell, TableHead, TableHeadCell, TableRow, Button, ButtonGroup } from "flowbite-react";
 import usePollStore from "../../../store/pollStore";
 import useUserStore from "../../../store/userStore";
 import { useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { toLocalTime } from "../../../utils/timezones";
+import LoadingSpinner from "../../../components/LoadingSpinner";
 
 
 const EditPolls = () => {
@@ -45,12 +46,7 @@ const EditPolls = () => {
 
   if (isLoading && draftPolls.length == 0) {
     return (
-      <div className="flex min-h-screen w-full  items-center justify-center m-2">
-        <div>
-          <Spinner />
-          <h4>Loading Polls...</h4>
-        </div>
-      </div>
+      <LoadingSpinner/>
     )
   }
 

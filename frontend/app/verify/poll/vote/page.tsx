@@ -73,6 +73,7 @@ const VotePage = () => {
 
             <Button
                 onClick={() => voteButton()}
+                color="cyan"
                 className="mt-6 w-full max-w-md sm:max-w-sm text-base sm:text-lg py-2"
             >
                 Submit

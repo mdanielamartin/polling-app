@@ -1,10 +1,11 @@
 "use client"
-import { Button, Label, Spinner, TextInput } from "flowbite-react";
+import { Button, Label,TextInput } from "flowbite-react";
 import { useForm } from "react-hook-form";
 import { useRouter } from 'next/navigation'
 import * as yup from "yup"
 import { yupResolver } from "@hookform/resolvers/yup";
 import useUserStore from "../../../store/userStore";
+import LoadingSpinner from "../../../components/LoadingSpinner";
 
 const ResetRequest = ()=> {
 
@@ -28,9 +29,7 @@ const ResetRequest = ()=> {
 
   if (isLoading){
     return(
-      <div className="flex h-screen items-center justify-center">
-        <Spinner/>
-      </div>
+   <LoadingSpinner/>
 
     )
   }
@@ -38,8 +37,8 @@ const ResetRequest = ()=> {
   return (
     <div className="flex h-screen items-center justify-center">
 
-    <form onSubmit={handleSubmit(onSubmit)} className="flex max-w-md  w-full p-6 flex-col gap-4">
-         <h1 className="font-bold text-2xl text-center">RESET PASSWORD FORM</h1>
+    <form onSubmit={handleSubmit(onSubmit)} className="flex max-w-md w-full flex-col gap-4 rounded-2xl py-10 px-8 bg-gray-50 shadow-2xl">
+         <h1 className="font-bold text-2xl text-center text-cyan-700">RESET PASSWORD</h1>
       <div>
         <div className="mb-2 block">
           <Label htmlFor="email2">Email</Label>
@@ -48,7 +47,7 @@ const ResetRequest = ()=> {
         <p className="text-gray-500 text-xs">If your email address is registered you will be receiving an email with instructions to reset your password.</p>
         <p className="text-red-500">{errors.email?.message}</p>
       </div>
-      <Button type="submit">Request Password Change</Button>
+      <Button type="submit" className="w-full text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:outline-none focus:ring-cyan-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Request Password Change</Button>
     </form>
     </div>
   );

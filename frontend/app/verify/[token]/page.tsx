@@ -3,8 +3,8 @@
 import { useParams } from 'next/navigation'
 import usePolleeStore from '../../../store/polleeStore'
 import { useEffect } from 'react'
-import { Spinner } from 'flowbite-react'
 import { useRouter } from 'next/navigation'
+import LoadingSpinner from '../../../components/LoadingSpinner'
 
 
 const VerifyToken = () => {
@@ -27,9 +27,9 @@ const VerifyToken = () => {
   }, [token, getPoll, status,router])
 
   return (
-    <div className="flex justify-center items-center h-screen">
-      <Spinner />
-      Verifying...
+    <div>
+      <LoadingSpinner/>
+      <h4 className='text-center text-cyan-700'>Verifying your link, you will be redirected shortly...</h4>
     </div>
   )
 }

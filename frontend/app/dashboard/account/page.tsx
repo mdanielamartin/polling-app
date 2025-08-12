@@ -1,9 +1,10 @@
 "use client"
 import useUserStore from "../../../store/userStore"
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 
 const Account = () => {
-
+    const router = useRouter()
     const { getUser } = useUserStore()
     const [user, setUser] = useState({ id: null, email: "" })
 
@@ -19,7 +20,7 @@ const Account = () => {
     return (
 
         <div className="max-w-md mx-auto mt-10 p-6 bg-white rounded-lg shadow-md">
-            <h2 className="text-2xl font-bold mb-4 text-center">Account Info</h2>
+            <h2 className="text-2xl font-bold mb-4 text-center text-cyan-700">ACCOUNT INFO</h2>
 
             <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700">Email:</label>
@@ -28,12 +29,12 @@ const Account = () => {
 
             <button
                 type="button"
-                className="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                className="w-full text-white bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:outline-none focus:ring-cyan-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                 onClick={() => {
-                    console.log('Request password reset for:', user.email);
+                    router.push("/password/reset-request")
                 }}
             >
-                Request Password Reset
+                Change Password
             </button>
         </div>
 

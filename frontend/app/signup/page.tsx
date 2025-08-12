@@ -1,6 +1,6 @@
 
 "use client"
-import { Button, Spinner, Label, TextInput } from "flowbite-react";
+import { Button, Label, TextInput } from "flowbite-react";
 import { useForm } from "react-hook-form";
 import { useRouter } from 'next/navigation'
 import * as yup from "yup"
@@ -8,6 +8,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import useUserStore from "../../store/userStore";
 import { showRegistrationError } from "../../utils/alerts";
 import { useEffect } from "react";
+import LoadingSpinner from "../../components/LoadingSpinner";
 
 const SignUp = ()=> {
     const {signup,error,isLoading} = useUserStore()
@@ -42,10 +43,7 @@ const SignUp = ()=> {
   if (isLoading){
 
     return (
- <div className="flex h-screen items-center justify-center">
-    <Spinner color="cyan"/>
- </div>
-
+    <LoadingSpinner/>
     )
   }
   return (

@@ -113,6 +113,7 @@ const useUserStore = create<UserState>((set, get) => ({
                 message = err.message
                 set({ error: message, isLoading: false })
             }
+            return {email:"Connection error", id:null}
         }
     },
 
