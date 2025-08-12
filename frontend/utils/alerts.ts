@@ -12,7 +12,7 @@ export const showLoginError = (message: string) => {
     icon: 'error',
     title: 'Login failed',
     text: message,
-    confirmButtonColor: 'rgb(28, 28, 222)',
+    confirmButtonColor: '#0097A7',
     confirmButtonText: 'Retry',
   }).then(() => clearError());
 };
@@ -25,7 +25,7 @@ export const showPollError = (message: string): void => {
     icon: 'error',
     title: 'Poll Error',
     text: message,
-    confirmButtonColor: ' #FF6C40',
+    confirmButtonColor: ' #0097A7',
     confirmButtonText: 'Retry',
   }).then(() => clearError());
 };
@@ -37,7 +37,7 @@ export const showRegistrationError = (message: string): void => {
     icon: 'error',
     title: 'Registration failed',
     text: message,
-    confirmButtonColor: ' #FF6C40',
+    confirmButtonColor: ' #0097A7',
     confirmButtonText: 'Retry',
   }).then(() => clearError());
 };
@@ -48,7 +48,7 @@ export const noSelectionWarning = (): void => {
     icon: "warning",
     title: 'No choice selected',
     text: "A choice must be selected ",
-    confirmButtonColor: ' #FF6C40',
+    confirmButtonColor: ' #0097A7',
     confirmButtonText: 'Retry',
   });
 };
@@ -59,7 +59,7 @@ export const voteError = (): void => {
     icon: "error",
     title: 'Something went wrong on our end!',
     text: "Please try again later!",
-    confirmButtonColor: ' #FF6C40',
+    confirmButtonColor: ' #0097A7',
     confirmButtonText: 'Close',
   });
 };
@@ -72,7 +72,7 @@ export const activationStatus = (message: string): void => {
     icon: "info",
     title: 'Poll Activation Status',
     text: message,
-    confirmButtonColor: ' #FF6C40',
+    confirmButtonColor: ' #0097A7',
     confirmButtonText: 'Accept',
   }).then(() => clearActivation());
 };

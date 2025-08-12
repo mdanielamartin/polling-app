@@ -9,9 +9,8 @@ const LandingPage = () => {
 
 
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-800 ">
-      {/* Hero Section */}
-      <section className="text-center bg-gray-100 px-6 py-20 max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gray-50 text-gray-800 m-1">
+      <section className="text-center bg-gray-50 shadow-2xl rounded-2xl px-3 py-6 max-w-4xl mx-auto mt-6">
         <h1 className="text-5xl font-extrabold mb-4 text-cyan-700 ">Simple, Secure, Smart Polls</h1>
         <p className="text-lg text-gray-700  mb-6">
           Create anonymous, one-vote-per-person polls with just an email. No tracking, no fuss — just meaningful votes.
@@ -24,19 +23,19 @@ const LandingPage = () => {
 
       {/* Features Section */}
       <section className="px-6 py-12 max-w-5xl mx-auto grid gap-6 md:grid-cols-2">
-        <div className="bg-white  p-6 rounded-xl shadow">
+        <div className="bg-white  p-6 rounded-xl shadow-md">
           <h2 className="text-xl font-semibold text-cyan-600  mb-2">🗳️ One Vote Per Participant</h2>
           <p>Each participant receives a unique link via email. No duplication, no tampering—pure democracy.</p>
         </div>
-        <div className="bg-white  p-6 rounded-xl shadow">
+        <div className="bg-white  p-6 rounded-xl shadow-md">
           <h2 className="text-xl font-semibold text-cyan-600  mb-2">📅 Expiry-Controlled Voting</h2>
           <p>Set deadlines to keep polls timely and relevant. Only votes within the window are counted.</p>
         </div>
-        <div className="bg-white  p-6 rounded-xl shadow">
+        <div className="bg-white  p-6 rounded-xl shadow-md">
           <h2 className="text-xl font-semibold text-cyan-600  mb-2">👥 Participant Lists</h2>
           <p>Save frequent voters and add them to polls with one click. Your community, streamlined.</p>
         </div>
-        <div className="bg-white  p-6 rounded-xl shadow">
+        <div className="bg-white  p-6 rounded-xl shadow-md">
           <h2 className="text-xl font-semibold text-cyan-600  mb-2">🔐 Anonymous & Secure</h2>
           <p>Votes are anonymous by design, yet traceable by origin — ensuring integrity and privacy.</p>
         </div>
@@ -69,7 +68,7 @@ const LandingPage = () => {
 
       {/* Footer */}
       <footer className="bg-white  text-center py-6 mt-12 border-t ">
-        <p className="text-sm text-gray-600 ">&copy; 2025 Polling App. Built with Flowbite & Tailwind CSS.</p>
+        <p className="text-sm text-gray-600 ">&copy; 2025 Polling App</p>
       </footer>
     </div>
 

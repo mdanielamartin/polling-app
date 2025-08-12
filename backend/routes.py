@@ -1,11 +1,11 @@
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity, get_jwt, verify_jwt_in_request
-from jwt.exceptions import ExpiredSignatureError
+from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 import bcrypt
 from .models import db, User, Poll, Choice, Pollee, PollAssignment, Vote, List, list_member
 from marshmallow import ValidationError
 from .validation import UserSchema, PollSchema, ChoiceSchema, PolleeSchema, PollAssignmentSchema, VoteSchema, ListSchema
-from .utils import check_user, generate_url, send_token_email
+from .utils import check_user, generate_url, send_token_email, send_reset_email
 from datetime import timedelta, datetime
 from pytz import timezone, utc
 from sqlalchemy import func
@@ -485,7 +485,7 @@ def activate_poll(id):
 
 @api_blueprint.route("/poll/resend/<int:id>", methods=["PUT"])
 @jwt_required()
-def activate_poll(id):
+def resend_invitation(id):
     user_id = get_jwt_identity()
     auth = check_user(user_id)
     data = request.json
@@ -507,7 +507,7 @@ def activate_poll(id):
         local_closing_time = poll.closing_date.astimezone(user_timezone)
         fails = []
         for assign_id in ids:
-            assignment = PollAssignment.get(assign_id)
+            assignment = PollAssignment.query.get(assign_id)
             if not assignment:
                 continue
             token = generate_url(assignment.pollee_id,id,poll.closing_date,poll.publish_date)
@@ -714,3 +714,53 @@ def delete_from_list(list_id):
         return jsonify(updated_list.serialize()), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+
+
+@api_blueprint.route('/reset-password/send-email', methods=['POST'])
+def reset_password_email():
+        data = request.json
+        email = data.get('email',None)
+        try:
+            user = User.query.filter_by(email=email).first()
+            if not user:
+                return jsonify('Incorrect email address'),404
+
+            expiration = timedelta(minutes=10)
+            reset_token = create_access_token(identity=email, expires_delta=expiration)
+            status = send_reset_email(email,reset_token)
+            if status == 200:
+                return jsonify('Email sent successfully'),200
+            return jsonify('Email not send'),400
+        except Exception as e:
+            return jsonify(f"Server error: {e}"), 500
+
+@api_blueprint.route('/reset-password', methods=['GET', 'PUT'])
+@jwt_required()
+def reset_password():
+    if request.method == 'GET':
+        try:
+            client_email = get_jwt_identity()
+            return jsonify({'msg':'Token is valid','email':client_email}),200
+        except ExpiredSignatureError:
+            return jsonify({'msg':'Token is expired'}),401
+        except InvalidTokenError:
+            return jsonify({'msg':'Token is invalid'}),401
+        except Exception as e:
+            return jsonify({"msg": f"Server error: {e}"}), 500
+    elif request.method == 'PUT':
+        data = request.json
+        email = get_jwt_identity()
+        password = data.get('password',None)
+
+        if not password or not email:
+            return jsonify({'msg':'Must provide a new password'}), 400
+        try:
+            user=User.query.filter_by(email=email).first()
+            hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt())
+            user.password = hashed_password.decode('utf-8')
+            db.session.commit()
+            return jsonify({'msg':f'Password changed successfully'}), 200
+
+        except Exception as e:
+            return jsonify({"msg": "Server error"}), 500
