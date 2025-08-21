@@ -78,7 +78,7 @@ def create_poll():
     except ValidationError as e:
         return jsonify(e.messages), 400
     try:
-        poll = Poll(name=validated_data["name"],time_limit_days=validated_data["time_limit_days"],user_id=user_id)
+        poll = Poll(name=validated_data["name"],time_limit_days=validated_data["time_limit_days"],description=["description"],user_id=user_id)
         db.session.add(poll)
         db.session.commit()
         return jsonify(poll.serialize()), 200
