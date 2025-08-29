@@ -29,7 +29,7 @@ def close_expired_polls():
 
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(close_expired_polls, "cron", hour=23, minute=59)
+scheduler.add_job(close_expired_polls, "interval", minutes=15)
 
 with app.app_context():
     scheduler.start()

@@ -2,7 +2,6 @@
 import { create } from "zustand";
 
 
-const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
 
 interface PolleeState {
     error: string | null;
@@ -49,6 +48,7 @@ const usePolleeStore = create<PolleeState>((set) => ({
     token:null,
 
     getPoll: async ( token: string) => {
+        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}poll/vote`, {
@@ -73,6 +73,7 @@ const usePolleeStore = create<PolleeState>((set) => ({
 
 
     castVote: async (data: Vote, token: string) => {
+        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}pollee/vote`, {

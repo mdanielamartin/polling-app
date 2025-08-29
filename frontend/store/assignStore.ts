@@ -1,8 +1,6 @@
 import { create } from "zustand";
 
 
-const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
-
 interface AssigmentState {
     error: string | null;
     isLoading: boolean;
@@ -34,6 +32,7 @@ const useAssignStore = create<AssigmentState>((set) => ({
     activation: false,
 
     addAssignments: async (contactIds: number[], token: string, poll_id: number) => {
+        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}pollee/assignment/${poll_id}`, {
@@ -62,6 +61,7 @@ const useAssignStore = create<AssigmentState>((set) => ({
     },
 
     removeAssignments: async (contactIds: number[], token: string, pollId: number) => {
+        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}pollee/assignment/${pollId}`, {
@@ -95,6 +95,7 @@ const useAssignStore = create<AssigmentState>((set) => ({
     },
 
     getAssignments: async (token: string, pollId: number) => {
+        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}pollee/assignment/${pollId}`, {
@@ -120,6 +121,7 @@ const useAssignStore = create<AssigmentState>((set) => ({
     },
 
     resendAssignments: async (ids: number[], pollId: number, tz: string, token: string) => {
+        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}poll/resend/${pollId}`, {

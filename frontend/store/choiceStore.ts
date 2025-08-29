@@ -2,8 +2,6 @@
 import { create } from "zustand";
 
 
-const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
-
 interface ChoiceState {
     error: string | null;
     isLoading: boolean;
@@ -36,6 +34,7 @@ const useChoiceStore = create<ChoiceState>((set) => ({
     choices: [],
 
     addChoice: async (data: ChoiceData, token: string, poll_id: number) => {
+        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}poll/${poll_id}/add/choice`, {
@@ -64,6 +63,7 @@ const useChoiceStore = create<ChoiceState>((set) => ({
 
 
     updateChoice: async (data: Choice, token: string, poll_id: number) => {
+        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}poll/${poll_id}/update/choice`, {
@@ -96,6 +96,7 @@ const useChoiceStore = create<ChoiceState>((set) => ({
     },
 
     deleteChoice: async (choice_id: number, token: string, poll_id: number) => {
+        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}poll/${poll_id}/delete/choice/${choice_id}`, {
@@ -125,6 +126,7 @@ const useChoiceStore = create<ChoiceState>((set) => ({
     },
 
     getChoices: async (poll_id: number, token: string) => {
+        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}poll/${poll_id}`, {

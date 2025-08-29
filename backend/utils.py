@@ -20,6 +20,12 @@ def check_user(id):
     return True
 
 def send_token_email(email,token, expiration_date,timezone, poll_name):
+    load_dotenv()
+
+    FRONTEND_URL = os.getenv('FRONTEND_URL')
+    KEY = os.getenv('MAIL_KEY')
+    SECRET = os.getenv('MAIL_SECRET')
+
     poll_link = f'{FRONTEND_URL}/verify/{token}'
     api_key = KEY
     api_secret = SECRET
@@ -67,6 +73,12 @@ def generate_url(pollee_id,poll_id,closing_date,publish_date):
 
 
 def send_reset_email(to_email,token):
+    
+    load_dotenv()
+    FRONTEND_URL = os.getenv('FRONTEND_URL')
+    KEY = os.getenv('MAIL_KEY')
+    SECRET = os.getenv('MAIL_SECRET')
+    
     reset_link = f'{FRONTEND_URL}password/change?token={token}'
     api_key = KEY
     api_secret = SECRET

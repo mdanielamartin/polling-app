@@ -1,14 +1,16 @@
 "use client"
 import { Button,Label, Spinner, TextInput } from "flowbite-react";
-import { useEffect, useState} from "react";
+import {useEffect, useState} from "react";
 import { useForm } from "react-hook-form";
 import { useRouter, useSearchParams } from 'next/navigation'
 import * as yup from "yup"
 import { yupResolver } from "@hookform/resolvers/yup";
 import useUserStore from "../store/userStore";
+import LoadingSpinner from "./LoadingSpinner";
 
 const ChangePasswordForm = ()=> {
-    const {isLoading, resetPassword, validateRequestToken} = useUserStore()
+    const {isLoading, resetPassword} = useUserStore()
+    const validateRequestToken = useUserStore.getState().validateRequestToken
     const [showForm, setShowForm] = useState(false)
     const router = useRouter()
     const passwordSchema = yup.object().shape({
@@ -34,7 +36,8 @@ const ChangePasswordForm = ()=> {
   const token = params.get("token")
 
   useEffect(()=>{
-
+    if (!token) return
+    
     const onLoad = async ()=>{
       const res = await validateRequestToken(token)
 
@@ -48,11 +51,11 @@ const ChangePasswordForm = ()=> {
 
     onLoad()
 
-  }, [token, router,validateRequestToken])
+  }, [token, router])
 
   if (isLoading){
     return (
-      <Spinner/>
+      <LoadingSpinner/>
     )
   }
 
