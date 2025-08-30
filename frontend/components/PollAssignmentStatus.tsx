@@ -49,6 +49,7 @@ const PollAssignmentStatus = () => {
 
     return (
         <>
+            <h3 className="text-center my-2">Only polless who have not voted are shown. Votes are a secret and results are counted upon expiration.</h3>
             <div className=" flex  place-content-center space-x-4 mb-4">
                 <Button color="cyan" className="w-full max-w-xs py-3 shadow hover:shadow-lg sm:text-sm text-xs " onClick={() => resend(resends)}>Resend Emails</Button>
             </div>

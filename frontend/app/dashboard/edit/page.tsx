@@ -19,6 +19,7 @@ const EditPolls = () => {
     const utcNow = localNow.toISOString()
     const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
     await activatePoll(id, utcNow, timezone, token)
+    router.push(`/dashboard/live`)
   }
 
   const editButton = (id: number) => {

@@ -4,9 +4,6 @@ import { create } from "zustand";
 
 
 
-const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
-
-
 interface UserState {
     token: string | null;
     error: string | null;
@@ -31,6 +28,7 @@ const useUserStore = create<UserState>((set, get) => ({
     isLoading: false,
 
     login: async (loginData) => {
+        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}user/login`, {
@@ -66,6 +64,7 @@ const useUserStore = create<UserState>((set, get) => ({
     },
 
     signup: async (registerData) => {
+        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}user/register`, {
@@ -91,6 +90,7 @@ const useUserStore = create<UserState>((set, get) => ({
     },
 
     getUser: async () => {
+        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
         set({ isLoading: true, error: null })
         const token = get().token
         try {
@@ -119,6 +119,7 @@ const useUserStore = create<UserState>((set, get) => ({
 
 
     passwordChangeRequest: async (data:email) => {
+        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}reset-password/send-email`, {
@@ -145,6 +146,7 @@ const useUserStore = create<UserState>((set, get) => ({
 
 
     validateRequestToken: async (token: string) => {
+        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}reset-password`, {
@@ -171,6 +173,7 @@ const useUserStore = create<UserState>((set, get) => ({
 
 
     resetPassword: async (data:password) => {
+        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
         set({ isLoading: true, error: null })
         const token = sessionStorage.getItem("reset-password")
         try {

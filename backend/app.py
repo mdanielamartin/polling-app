@@ -4,16 +4,16 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from backend.commands import set_commands
-from .models import db, Poll
+from .models import Poll
+from .extensions import db
 from datetime import datetime, timezone
 from apscheduler.schedulers.background import BackgroundScheduler
 
 
 app = create_app()
 migrate = Migrate(app, db)
-jwt = JWTManager(app)
 set_commands(app)
-CORS(app)
+
 
 
 def close_expired_polls():
@@ -29,7 +29,7 @@ def close_expired_polls():
 
 
 scheduler = BackgroundScheduler()
-scheduler.add_job(close_expired_polls, "cron", hour=23, minute=59)
+scheduler.add_job(close_expired_polls, "interval", minutes=15)
 
 with app.app_context():
     scheduler.start()

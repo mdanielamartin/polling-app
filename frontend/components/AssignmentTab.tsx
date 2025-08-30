@@ -1,6 +1,6 @@
 "use client"
 import { Dropdown, DropdownItem, Button, Table, TableHead, TableHeadCell, TableRow, Checkbox, TableBody, TableCell, Tabs, TabItem } from "flowbite-react"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import useAssignStore from "../store/assignStore"
 import useContactStore from "../store/contactStore"
@@ -9,7 +9,7 @@ import useListStore from "../store/listStore"
 import usePollStore from "../store/pollStore"
 
 const AssignmentTab = () => {
-
+    const router = useRouter()
     const [newAssigments, setNewAssignments] = useState([])
     const [deleteAssignments, setDeleteAssignments] = useState([])
     const [unassigned, setUnassigned] = useState([])
@@ -28,6 +28,7 @@ const AssignmentTab = () => {
         const utcNow = localNow.toISOString()
         const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
         await activatePoll(id, utcNow, timezone, token)
+        router.push(`/dashboard/live`)
     }
     interface ContactData {
         id: number,

@@ -2,7 +2,6 @@
 import { create } from "zustand";
 
 
-const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
 
 interface ListState {
     error: string | null;
@@ -43,6 +42,7 @@ const useListStore = create<ListState>((set) => ({
     lists: [],
 
     createList: async (data: string, token: string) => {
+        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
         set({ isLoading: true, error: null })
         const listName = {"name":data}
         try {
@@ -70,6 +70,7 @@ const useListStore = create<ListState>((set) => ({
 
 
     updateList: async ( data:ListData,token: string) => {
+        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}list/update`, {
@@ -100,6 +101,7 @@ const useListStore = create<ListState>((set) => ({
     },
 
     deleteList: async (listId: number, token: string) => {
+        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}list/delete/${listId}`, {
@@ -128,6 +130,7 @@ const useListStore = create<ListState>((set) => ({
 
     addToList: async(idList:number[],listId:number,token:string) =>
         {
+        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}list/${listId}/add/pollee`, {
@@ -157,6 +160,7 @@ const useListStore = create<ListState>((set) => ({
         },
         deleteFromList: async(idList:number[],listId:number,token:string) =>
         {
+            const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}list/${listId}/delete/pollee`, {
@@ -186,6 +190,7 @@ const useListStore = create<ListState>((set) => ({
         },
 
     getLists: async ( token: string) => {
+        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}lists`, {

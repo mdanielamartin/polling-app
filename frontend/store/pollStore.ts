@@ -2,7 +2,7 @@
 import { create } from "zustand";
 
 
-const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
+
 
 interface PollState {
     error: string | null;
@@ -14,7 +14,7 @@ interface PollState {
     updatePoll: (data: PollData, token: string) => Promise<void>;
     deletePoll: (id: number, token: string) => Promise<void>;
     getPolls: (token: string) => Promise<void>;
-    getPoll: (data: number, token: string) => Promise<void>;
+    getPoll: (data: number, token: string) => Promise<Poll>;
     activatePoll: (data: number, date: string, tz: string, token: string) => Promise<string>;
     getResults: (data: number, token: string) => Promise<Result[]>;
     clearError: () => void;
@@ -69,6 +69,7 @@ const usePollStore = create<PollState>((set) => ({
     poll: { name: null, id: null, user_id: null, created_at: null, publish_date: null, closing_date: null, time_limit_days: null, status: null, description: null, choices: [] },
 
     createPoll: async (data: PollCreate, token: string) => {
+        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}poll/create`, {
@@ -100,6 +101,7 @@ const usePollStore = create<PollState>((set) => ({
 
 
     updatePoll: async (data: PollData, token: string) => {
+        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}poll/update/${data.id}`, {
@@ -128,6 +130,7 @@ const usePollStore = create<PollState>((set) => ({
     },
 
     deletePoll: async (pollId: number, token: string) => {
+        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}poll/delete/${pollId}`, {
@@ -153,6 +156,7 @@ const usePollStore = create<PollState>((set) => ({
     },
 
     getPolls: async (token: string) => {
+        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}polls`, {
@@ -176,6 +180,7 @@ const usePollStore = create<PollState>((set) => ({
     },
 
     getPoll: async (pollId: number, token: string) => {
+        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}poll/${pollId}`, {
@@ -185,10 +190,11 @@ const usePollStore = create<PollState>((set) => ({
 
             if (!res.ok) {
                 const errorData = await res.json()
-                throw new Error(errorData || 'Login failed')
+                throw new Error(errorData || 'Poll fetch failed')
             }
             const poll = await res.json()
             set({ isLoading: false, poll: poll })
+            return poll
         } catch (err: unknown) {
             let message = 'Unexpected error'
             if (err instanceof Error) {
@@ -199,6 +205,7 @@ const usePollStore = create<PollState>((set) => ({
     },
 
     activatePoll: async (pollId: number, date: string, tz: string, token: string) => {
+        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}poll/activate/${pollId}`, {
@@ -229,6 +236,7 @@ const usePollStore = create<PollState>((set) => ({
 
     },
     getResults: async (pollId: number, token: string) => {
+        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}poll/results/${pollId}`, {

@@ -2,7 +2,7 @@
 import { create } from "zustand";
 
 
-const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
+
 
 interface ContactState {
     error: string | null;
@@ -33,6 +33,7 @@ const useContactStore = create<ContactState>((set) => ({
     contacts: [],
 
     addContact: async (data: ContactData, token: string) => {
+        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}pollee/add`, {
@@ -61,6 +62,7 @@ const useContactStore = create<ContactState>((set) => ({
 
 
     updateContact: async (data: Contact, token: string) => {
+        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}pollee/update`, {
@@ -91,6 +93,7 @@ const useContactStore = create<ContactState>((set) => ({
     },
 
     deleteContacts: async (contact_ids: number[], token: string) => {
+        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}pollee/delete`, {
@@ -120,6 +123,7 @@ const useContactStore = create<ContactState>((set) => ({
     },
 
     getContacts: async ( token: string) => {
+        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}pollees`, {

@@ -12,15 +12,15 @@ import useChoiceStore from "../../../../../store/choiceStore";
 const EditPoll = () => {
     const params = useParams()
     const slug = Number(params.slug)
-    const { getPoll, poll } = usePollStore()
+    const { getPoll} = usePollStore()
     const { token } = useUserStore()
     const { setChoices } = useChoiceStore()
 
     useEffect(() => {
         const onLoad = async () => {
-            await getPoll(slug, token)
-            if (poll.choices) {
-                setChoices(poll.choices)
+            const pollData = await getPoll(slug, token)
+            if (pollData?.choices) {
+                setChoices(pollData.choices)
             }
         }
         onLoad()

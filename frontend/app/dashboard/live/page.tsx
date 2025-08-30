@@ -87,7 +87,7 @@ const LivePolls = () => {
                                     {poll.time_limit_days}
                                 </TableCell>
                                 <TableCell className="text-center text-gray-700 text-sm sm:text-base">
-                                    <Button onClick={() => router.push(`/dashboard/live/poll/${poll.id}`)} color="alternative">View Results</Button>
+                                    <Button onClick={() => router.push(`/dashboard/live/poll/${poll.id}`)} color="alternative">View</Button>
                                 </TableCell>
                             </TableRow>
                         ))}

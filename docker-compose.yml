@@ -28,7 +28,7 @@ services:
     image: postgres:16
     container_name: postgres_poll
     ports:
-      - "5432:5432"
+      - "5432:5433"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U mdmpereira -d poll_app"]
       interval: 5s
