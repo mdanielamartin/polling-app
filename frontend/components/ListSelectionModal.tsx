@@ -12,13 +12,13 @@ const ListSelectionModal = ({contactIds, onActionComplete}) => {
     const {token} = useUserStore()
     const {addToList, lists} = useListStore()
     const [openModal, setOpenModal] = useState(false);
-    const [selectList, setSelectList] = useState<number>(null)
+    const [selectList, setSelectList] = useState({id:null,name:null})
     function onCloseModal() {
         setOpenModal(false);
     }
 
     const addButton = async () =>{
-        await addToList(contactIds,selectList , token)
+        await addToList(contactIds,selectList.id , token)
         setSelectList(null)
         onActionComplete()
         setOpenModal(false)
@@ -32,9 +32,9 @@ const ListSelectionModal = ({contactIds, onActionComplete}) => {
                 <ModalBody>
                     <div className="bg-gray-100 h-auto min-w-95/100 rounded-xl px-4 mx-auto justify-center ">
                         <form className="mx-auto p-4" id="list">
-                            <Dropdown color="light" label={selectList? selectList:"Select a List"} value={4} className="max-h-48 overflow-y-auto mb-4 py-2 mx-auto w-3/4 " dismissOnClick={false}>
+                            <Dropdown color="light" label={selectList.id? selectList.name:"Select a List"} value={4} className="max-h-48 overflow-y-auto mb-4 py-2 mx-auto w-3/4 " dismissOnClick={false}>
                                 {lists.map((list) => (
-                                    <DropdownItem key={list.id} onClick={() => setSelectList(list.id) }className="bg-gray-50 hover:bg-gray-100">{list.name}</DropdownItem>
+                                    <DropdownItem key={list.id} onClick={() => setSelectList({id:list.id,name:list.name}) }className="bg-gray-50 hover:bg-gray-100">{list.name}</DropdownItem>
                                 ))}
 
                             </Dropdown>

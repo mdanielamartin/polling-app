@@ -61,6 +61,7 @@ useEffect(()=>{
           </div>
           <TextInput id="password1" type="password" placeholder="Minimun 8 characters long..." required {...register("password")} />
           <p className="text-red-500">{errors.password?.message}</p>
+          <a className="text-cyan-700 text-xs hover:underline" href="/password/reset-request">Did you forget your password?</a>
         </div>
         <Button type="submit" color="cyan" className="font-bold">LOGIN</Button>
       </form>

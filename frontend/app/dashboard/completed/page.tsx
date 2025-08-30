@@ -9,7 +9,7 @@ import { toLocalTime } from "../../../utils/timezones";
 import LoadingSpinner from "../../../components/LoadingSpinner";
 
 const CompletePolls = () => {
-    const { getPolls, polls, isLoading } = usePollStore()
+    const { getPolls, polls, isLoading, deletePoll } = usePollStore()
     const token = useUserStore.getState().token
     const router = useRouter()
 
@@ -92,6 +92,15 @@ const CompletePolls = () => {
                                     {toLocalTime(poll.closing_date)}
                                 </TableCell>
                                 <TableCell className="text-center">
+                                    <Button
+                      color="red"
+                      className="text-sm px-2 py-1"
+                      onClick={async () => {
+                        await deletePoll(poll.id, token);
+                      }}
+                    >
+                      Delete
+                    </Button>
                                     <Button onClick={() => router.push(`/dashboard/completed/poll/${poll.id}`)} color="alternative">View Results</Button>
                                 </TableCell>
                             </TableRow>

@@ -8,8 +8,11 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import useUserStore from "../store/userStore";
 import LoadingSpinner from "./LoadingSpinner";
 
+
 const ChangePasswordForm = ()=> {
-    const {isLoading, resetPassword} = useUserStore()
+    const {isLoading} = useUserStore()
+    const {resetPassword} = useUserStore()
+    const [submission, setSubmission] = useState(false)
     const validateRequestToken = useUserStore.getState().validateRequestToken
     const [showForm, setShowForm] = useState(false)
     const router = useRouter()
@@ -25,10 +28,12 @@ const ChangePasswordForm = ()=> {
 
 
     const onSubmit = async (data: FormData) => {
+        setSubmission(true)
         const res = await resetPassword({"password":data.password})
-
         if (res){
-          router.push("confirm")
+          router.push("success")
+        }else {
+          router.push("invalid")
         }
   }
 
@@ -37,10 +42,8 @@ const ChangePasswordForm = ()=> {
 
   useEffect(()=>{
     if (!token) return
-    
     const onLoad = async ()=>{
       const res = await validateRequestToken(token)
-
       if (res) {
         setShowForm(true)
       }else{
@@ -48,16 +51,14 @@ const ChangePasswordForm = ()=> {
         router.push("invalid")
       }
     }
-
     onLoad()
+  }, [])
 
-  }, [token, router])
-
-  if (isLoading){
-    return (
-      <LoadingSpinner/>
-    )
-  }
+    if (isLoading){
+      return (
+        <LoadingSpinner/>
+      )
+    }
 
   return (
     <div className="flex h-screen items-center justify-center">
@@ -78,7 +79,7 @@ const ChangePasswordForm = ()=> {
         <TextInput id="repeat-password" type="password" required shadow {...register("passwordConfirm")} />
         <p className="text-red-500">{errors.passwordConfirm?.message}</p>
       </div>
-      <Button type="submit">Change Password</Button>
+      <Button type="submit" color="cyan" disabled={submission}>Change Password</Button>
     </form>): <Spinner/>}
     </div>
   );
