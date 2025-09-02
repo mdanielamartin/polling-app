@@ -91,18 +91,26 @@ const CompletePolls = () => {
                                 <TableCell className="text-center text-gray-700 text-sm sm:text-base">
                                     {toLocalTime(poll.closing_date)}
                                 </TableCell>
-                                <TableCell className="text-center">
-                                    <Button
-                      color="red"
-                      className="text-sm px-2 py-1"
-                      onClick={async () => {
-                        await deletePoll(poll.id, token);
-                      }}
-                    >
-                      Delete
-                    </Button>
-                                    <Button onClick={() => router.push(`/dashboard/completed/poll/${poll.id}`)} color="alternative">View Results</Button>
-                                </TableCell>
+                               <TableCell className="text-center">
+  <div className="flex justify-center space-x-2">
+    <Button
+      color="red"
+      className="text-sm px-2 py-1"
+      onClick={async () => {
+        await deletePoll(poll.id, token);
+      }}
+    >
+      Delete
+    </Button>
+    <Button
+      onClick={() => router.push(`/dashboard/completed/poll/${poll.id}`)}
+      color="alternative"
+      className="text-sm px-2 py-1"
+    >
+      View Results
+    </Button>
+  </div>
+</TableCell>
                             </TableRow>
                         ))}
                     </TableBody>

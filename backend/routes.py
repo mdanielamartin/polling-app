@@ -2,10 +2,10 @@ from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity, get_jwt, verify_jwt_in_request
 from jwt.exceptions import ExpiredSignatureError, InvalidTokenError
 import bcrypt
-from .models import db, User, Poll, Choice, Pollee, PollAssignment, Vote, List, list_member
+from models import db, User, Poll, Choice, Pollee, PollAssignment, Vote, List, list_member
 from marshmallow import ValidationError
-from .validation import UserSchema, PollSchema, ChoiceSchema, PolleeSchema, PollAssignmentSchema, VoteSchema, ListSchema
-from .utils import check_user, generate_url, send_token_email, send_reset_email
+from validation import UserSchema, PollSchema, ChoiceSchema, PolleeSchema, PollAssignmentSchema, VoteSchema, ListSchema
+from utils import check_user, generate_url, send_token_email, send_reset_email
 from datetime import timedelta, datetime
 from pytz import timezone, utc
 from sqlalchemy import func
@@ -78,7 +78,7 @@ def create_poll():
     except ValidationError as e:
         return jsonify(e.messages), 400
     try:
-        poll = Poll(name=validated_data["name"],time_limit_days=validated_data["time_limit_days"],description=["description"],user_id=user_id)
+        poll = Poll(name=validated_data["name"],time_limit_days=validated_data["time_limit_days"],description=validated_data["description"],user_id=user_id)
         db.session.add(poll)
         db.session.commit()
         return jsonify(poll.serialize()), 200

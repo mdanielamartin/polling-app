@@ -137,7 +137,7 @@ const Contacts = () => {
                     <div className="w-full overflow-x-auto sm:overflow-visible">
 
 
-                        <Table className="max-w-[95] shadow-md rounded-lg  overflow-scroll table-auto">
+                        <Table className="w-full shadow-md rounded-lg">
                             <TableHead >
 
                                 <TableRow >
