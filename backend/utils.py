@@ -1,4 +1,4 @@
-from .models import User
+from models import User
 from flask_jwt_extended import jwt_required, create_access_token, get_jwt_identity
 from datetime import timedelta, datetime, timezone
 from mailjet_rest import Client

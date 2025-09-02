@@ -1,7 +1,7 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import timedelta, timezone, datetime
 from sqlalchemy.sql import func
-from .extensions import db
+from extensions import db
 
 created_at = datetime.now(timezone.utc)
 
