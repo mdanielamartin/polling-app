@@ -14,7 +14,7 @@ def create_app():
     db.init_app(app)
     app.register_blueprint(api_blueprint, url_prefix="/api") 
     jwt.init_app(app)
-    CORS(app, supports_credentials=True, origins=["https://potential-space-goldfish-97qj99gxxww5cx4vr-3000.app.github.dev"])
+    CORS(app, supports_credentials=True, origins=["https://polling-app-1yvh.onrender.com"])
     with app.app_context():
         db.create_all()
     return app
