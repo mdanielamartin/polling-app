@@ -1,6 +1,6 @@
 
 import { create } from "zustand";
-
+import { BACKEND_URL } from "./config";
 
 
 interface PolleeState {
@@ -48,10 +48,10 @@ const usePolleeStore = create<PolleeState>((set) => ({
     token:null,
 
     getPoll: async ( token: string) => {
-        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
+        
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}poll/vote`, {
+            const res = await fetch(`${BACKEND_URL}poll/vote`, {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             })
@@ -73,10 +73,10 @@ const usePolleeStore = create<PolleeState>((set) => ({
 
 
     castVote: async (data: Vote, token: string) => {
-        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
+        
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}pollee/vote`, {
+            const res = await fetch(`${BACKEND_URL}pollee/vote`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({choice_id:data}),

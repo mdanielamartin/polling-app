@@ -1,6 +1,6 @@
 
 import { create } from "zustand";
-
+import { BACKEND_URL } from "./config";
 
 
 
@@ -33,10 +33,10 @@ const useContactStore = create<ContactState>((set) => ({
     contacts: [],
 
     addContact: async (data: ContactData, token: string) => {
-        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
+        
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}pollee/add`, {
+            const res = await fetch(`${BACKEND_URL}pollee/add`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(data),
@@ -62,10 +62,10 @@ const useContactStore = create<ContactState>((set) => ({
 
 
     updateContact: async (data: Contact, token: string) => {
-        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
+        
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}pollee/update`, {
+            const res = await fetch(`${BACKEND_URL}pollee/update`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(data),
@@ -93,10 +93,10 @@ const useContactStore = create<ContactState>((set) => ({
     },
 
     deleteContacts: async (contact_ids: number[], token: string) => {
-        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
+        
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}pollee/delete`, {
+            const res = await fetch(`${BACKEND_URL}pollee/delete`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(contact_ids),
@@ -123,10 +123,10 @@ const useContactStore = create<ContactState>((set) => ({
     },
 
     getContacts: async ( token: string) => {
-        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
+        
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}pollees`, {
+            const res = await fetch(`${BACKEND_URL}pollees`, {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             })
