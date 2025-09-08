@@ -12,18 +12,20 @@ const VerifyToken = () => {
   const { getPoll, status } = usePolleeStore()
     const router = useRouter()
   useEffect(() => {
-    if (token) {
-      getPoll(token)
-    }
-    if (status == 200){
-         router.push("poll/vote/")}
-    else if (status == 401){
-        router.push("poll/expired/")}
-    else {
-        router.push("poll/invalid/")
-    }
 
-
+    const verify = async ()=>{
+      if (token) {
+        await getPoll(token)
+        if (status === 200){
+             router.push("poll/vote/")}
+        else if (status === 401){
+            router.push("poll/expired/")}
+        else {
+            router.push("poll/invalid/")
+        }
+      }
+    }
+    verify()
   }, [token, getPoll, status,router])
 
   return (
