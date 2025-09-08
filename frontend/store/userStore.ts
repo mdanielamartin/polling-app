@@ -1,8 +1,6 @@
 
 import { create } from "zustand";
-
-
-
+import { BACKEND_URL } from "./config";
 
 interface UserState {
     token: string | null;
@@ -28,10 +26,10 @@ const useUserStore = create<UserState>((set, get) => ({
     isLoading: false,
 
     login: async (loginData) => {
-        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
+        
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}user/login`, {
+            const res = await fetch(`${BACKEND_URL}user/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(loginData),
@@ -64,11 +62,11 @@ const useUserStore = create<UserState>((set, get) => ({
     },
 
     signup: async (registerData) => {
-        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
-        console.log(backendURL)
+        
+        console.log(BACKEND_URL)
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}user/register`, {
+            const res = await fetch(`${BACKEND_URL}user/register`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({email:registerData.email, password:registerData.password}),
@@ -91,11 +89,11 @@ const useUserStore = create<UserState>((set, get) => ({
     },
 
     getUser: async () => {
-        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
+        
         set({ isLoading: true, error: null })
         const token = get().token
         try {
-            const res = await fetch(`${backendURL}user`, {
+            const res = await fetch(`${BACKEND_URL}user`, {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             })
@@ -120,10 +118,10 @@ const useUserStore = create<UserState>((set, get) => ({
 
 
     passwordChangeRequest: async (data:email) => {
-        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
+        
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}reset-password/send-email`, {
+            const res = await fetch(`${BACKEND_URL}reset-password/send-email`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
@@ -147,10 +145,10 @@ const useUserStore = create<UserState>((set, get) => ({
 
 
     validateRequestToken: async (token: string) => {
-        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
+        
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}reset-password`, {
+            const res = await fetch(`${BACKEND_URL}reset-password`, {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json', "Authorization": `Bearer ${token}` },
             })
@@ -174,11 +172,11 @@ const useUserStore = create<UserState>((set, get) => ({
 
 
     resetPassword: async (data:password) => {
-        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
+        
         set({ isLoading: true, error: null })
         const token = sessionStorage.getItem("reset-password")
         try {
-            const res = await fetch(`${backendURL}reset-password`, {
+            const res = await fetch(`${BACKEND_URL}reset-password`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json',  "Authorization": `Bearer ${token}` },
                 body: JSON.stringify(data)
