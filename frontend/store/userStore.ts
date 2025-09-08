@@ -65,6 +65,7 @@ const useUserStore = create<UserState>((set, get) => ({
 
     signup: async (registerData) => {
         const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
+        console.log(backendURL)
         set({ isLoading: true, error: null })
         try {
             const res = await fetch(`${backendURL}user/register`, {
