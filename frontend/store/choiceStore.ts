@@ -1,6 +1,6 @@
 
 import { create } from "zustand";
-
+import { BACKEND_URL } from "./config";
 
 interface ChoiceState {
     error: string | null;
@@ -34,10 +34,10 @@ const useChoiceStore = create<ChoiceState>((set) => ({
     choices: [],
 
     addChoice: async (data: ChoiceData, token: string, poll_id: number) => {
-        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
+        
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}poll/${poll_id}/add/choice`, {
+            const res = await fetch(`${BACKEND_URL}poll/${poll_id}/add/choice`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(data),
@@ -63,10 +63,10 @@ const useChoiceStore = create<ChoiceState>((set) => ({
 
 
     updateChoice: async (data: Choice, token: string, poll_id: number) => {
-        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
+        
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}poll/${poll_id}/update/choice`, {
+            const res = await fetch(`${BACKEND_URL}poll/${poll_id}/update/choice`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(data),
@@ -96,10 +96,10 @@ const useChoiceStore = create<ChoiceState>((set) => ({
     },
 
     deleteChoice: async (choice_id: number, token: string, poll_id: number) => {
-        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
+        
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}poll/${poll_id}/delete/choice/${choice_id}`, {
+            const res = await fetch(`${BACKEND_URL}poll/${poll_id}/delete/choice/${choice_id}`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             })
@@ -126,10 +126,10 @@ const useChoiceStore = create<ChoiceState>((set) => ({
     },
 
     getChoices: async (poll_id: number, token: string) => {
-        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
+        
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}poll/${poll_id}`, {
+            const res = await fetch(`${BACKEND_URL}poll/${poll_id}`, {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             })

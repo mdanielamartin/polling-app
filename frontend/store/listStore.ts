@@ -1,6 +1,6 @@
 
 import { create } from "zustand";
-
+import { BACKEND_URL } from "./config";
 
 
 interface ListState {
@@ -42,11 +42,11 @@ const useListStore = create<ListState>((set) => ({
     lists: [],
 
     createList: async (data: string, token: string) => {
-        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
+       
         set({ isLoading: true, error: null })
         const listName = {"name":data}
         try {
-            const res = await fetch(`${backendURL}list/create`, {
+            const res = await fetch(`${BACKEND_URL}list/create`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(listName),
@@ -70,10 +70,10 @@ const useListStore = create<ListState>((set) => ({
 
 
     updateList: async ( data:ListData,token: string) => {
-        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
+       
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}list/update`, {
+            const res = await fetch(`${BACKEND_URL}list/update`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(data),
@@ -101,10 +101,10 @@ const useListStore = create<ListState>((set) => ({
     },
 
     deleteList: async (listId: number, token: string) => {
-        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
+       
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}list/delete/${listId}`, {
+            const res = await fetch(`${BACKEND_URL}list/delete/${listId}`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             })
@@ -130,10 +130,10 @@ const useListStore = create<ListState>((set) => ({
 
     addToList: async(idList:number[],listId:number,token:string) =>
         {
-        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
+       
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}list/${listId}/add/pollee`, {
+            const res = await fetch(`${BACKEND_URL}list/${listId}/add/pollee`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(idList),
@@ -160,10 +160,10 @@ const useListStore = create<ListState>((set) => ({
         },
         deleteFromList: async(idList:number[],listId:number,token:string) =>
         {
-            const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
+           
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}list/${listId}/delete/pollee`, {
+            const res = await fetch(`${BACKEND_URL}list/${listId}/delete/pollee`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(idList),
@@ -190,10 +190,10 @@ const useListStore = create<ListState>((set) => ({
         },
 
     getLists: async ( token: string) => {
-        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
+       
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}lists`, {
+            const res = await fetch(`${BACKEND_URL}lists`, {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             })

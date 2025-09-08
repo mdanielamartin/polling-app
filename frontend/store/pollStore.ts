@@ -1,5 +1,6 @@
 
 import { create } from "zustand";
+import { BACKEND_URL } from "./config";
 
 
 
@@ -69,10 +70,10 @@ const usePollStore = create<PollState>((set) => ({
     poll: { name: null, id: null, user_id: null, created_at: null, publish_date: null, closing_date: null, time_limit_days: null, status: null, description: null, choices: [] },
 
     createPoll: async (data: PollCreate, token: string) => {
-        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
+        
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}poll/create`, {
+            const res = await fetch(`${BACKEND_URL}poll/create`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(data),
@@ -101,10 +102,10 @@ const usePollStore = create<PollState>((set) => ({
 
 
     updatePoll: async (data: PollData, token: string) => {
-        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
+        
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}poll/update/${data.id}`, {
+            const res = await fetch(`${BACKEND_URL}poll/update/${data.id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(data),
@@ -130,10 +131,10 @@ const usePollStore = create<PollState>((set) => ({
     },
 
     deletePoll: async (pollId: number, token: string) => {
-        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
+        
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}poll/delete/${pollId}`, {
+            const res = await fetch(`${BACKEND_URL}poll/delete/${pollId}`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             })
@@ -156,10 +157,10 @@ const usePollStore = create<PollState>((set) => ({
     },
 
     getPolls: async (token: string) => {
-        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
+        
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}polls`, {
+            const res = await fetch(`${BACKEND_URL}polls`, {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             })
@@ -180,10 +181,10 @@ const usePollStore = create<PollState>((set) => ({
     },
 
     getPoll: async (pollId: number, token: string) => {
-        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
+        
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}poll/${pollId}`, {
+            const res = await fetch(`${BACKEND_URL}poll/${pollId}`, {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             })
@@ -205,10 +206,10 @@ const usePollStore = create<PollState>((set) => ({
     },
 
     activatePoll: async (pollId: number, date: string, tz: string, token: string) => {
-        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
+        
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}poll/activate/${pollId}`, {
+            const res = await fetch(`${BACKEND_URL}poll/activate/${pollId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ "publish_date": date, "user_timezone": tz })
@@ -236,10 +237,10 @@ const usePollStore = create<PollState>((set) => ({
 
     },
     getResults: async (pollId: number, token: string) => {
-        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
+        
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}poll/results/${pollId}`, {
+            const res = await fetch(`${BACKEND_URL}poll/results/${pollId}`, {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             })

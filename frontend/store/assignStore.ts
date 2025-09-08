@@ -1,5 +1,5 @@
 import { create } from "zustand";
-
+import { BACKEND_URL } from "./config";
 
 interface AssigmentState {
     error: string | null;
@@ -32,10 +32,10 @@ const useAssignStore = create<AssigmentState>((set) => ({
     activation: false,
 
     addAssignments: async (contactIds: number[], token: string, poll_id: number) => {
-        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
+        
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}pollee/assignment/${poll_id}`, {
+            const res = await fetch(`${BACKEND_URL}pollee/assignment/${poll_id}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(contactIds),
@@ -61,10 +61,10 @@ const useAssignStore = create<AssigmentState>((set) => ({
     },
 
     removeAssignments: async (contactIds: number[], token: string, pollId: number) => {
-        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
+        
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}pollee/assignment/${pollId}`, {
+            const res = await fetch(`${BACKEND_URL}pollee/assignment/${pollId}`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify(contactIds),
@@ -95,10 +95,10 @@ const useAssignStore = create<AssigmentState>((set) => ({
     },
 
     getAssignments: async (token: string, pollId: number) => {
-        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
+        
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}pollee/assignment/${pollId}`, {
+            const res = await fetch(`${BACKEND_URL}pollee/assignment/${pollId}`, {
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
             })
@@ -121,10 +121,10 @@ const useAssignStore = create<AssigmentState>((set) => ({
     },
 
     resendAssignments: async (ids: number[], pollId: number, tz: string, token: string) => {
-        const backendURL = process.env.NEXT_PUBLIC_BACKEND_URL
+        
         set({ isLoading: true, error: null })
         try {
-            const res = await fetch(`${backendURL}poll/resend/${pollId}`, {
+            const res = await fetch(`${BACKEND_URL}poll/resend/${pollId}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                 body: JSON.stringify({ "assignments": ids, "user_timezone": tz })
