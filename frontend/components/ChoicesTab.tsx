@@ -98,7 +98,7 @@ const ChoicesTab = () => {
             <div className="bg-white h-auto w-full rounded-xl mx-auto  my-4 justify-center">
                 <List className="list-none">
 
-                    {choices?.map((choice) => (
+                    {choices?.map((choice, idx) => (
 
                         choice.id === editing ?
                             <ListItem key={choice.id} className="text-black bg-stone-50 hover:bg-stone-100 rounded-lg border pl-4 py-5 border items-center justify-center flex">
@@ -134,7 +134,7 @@ const ChoicesTab = () => {
 
                             <ListItem key={choice.id} className="text-2xl place-content-between items-center text-bold text-black bg-stone-50 hover:bg-stone-100 rounded-lg border pl-4 py-5 border flex">
                                 <div className="flex">
-                                    <div className="text-6xl text-extrabold text-cyan-400 mr-4">1</div>
+                                    <div className="text-6xl text-extrabold text-cyan-400 mr-4">{idx + 1}</div>
                                     <div className="flex flex-col">
                                         <div className="text-2xl font-bold text-black">{choice.name}</div>
                                         <p className="text-gray-400 text-md">{choice.description}</p>
