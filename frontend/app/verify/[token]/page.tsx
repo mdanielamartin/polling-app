@@ -6,27 +6,28 @@ import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import LoadingSpinner from '../../../components/LoadingSpinner'
 
-
 const VerifyToken = () => {
   const { token } = useParams() as { token: string }
   const { getPoll, status } = usePolleeStore()
-    const router = useRouter()
-  useEffect(() => {
+  const router = useRouter()
 
-    const verify = async ()=>{
-      if (token) {
-        await getPoll(token)
-        if (status === 200){
-             router.push("poll/vote/")}
-        else if (status === 401){
-            router.push("poll/expired/")}
-        else {
-            router.push("poll/invalid/")
-        }
-      }
+  // Fetch poll when token changes
+  useEffect(() => {
+    if (token) {
+      getPoll(token)
     }
-    verify()
-  }, [token, getPoll, status,router])
+  }, [token, getPoll])
+
+  // Redirect when status changes
+  useEffect(() => {
+    if (status === 200) {
+      router.push('/verify/poll/vote/')
+    } else if (status === 401) {
+      router.push('poll/expired/')
+    } else if (status && status !== 200 && status !== 401) {
+      router.push('/verify/poll/invalid/')
+    }
+  }, [status, router])
 
   return (
     <div>
