@@ -1,36 +1,95 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# POLLING APP
 
-## Getting Started
+The project presents the following features:
 
-First, run the development server:
+- User authentication (JWT tokens)
+- Poll creation and voting system
+- CRUD operations (Create, Read, Update, and Delete)
+- Database management
+- Data validation and feedback
+- Email notifications & password reset via MailJet
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+It is a full-stack polling web application where users can create a password-protected account, create polls, share them via email, and allow others to vote. The app also includes secure password reset functionality using MailJet for email delivery.
+
+The frontend is built with Next.js and TypeScript. State management is handled using Zustand, forms and data validation are managed with Yup and React Hook Form, and styling/dark mode is implemented with TailwindCSS and Flowbite React. The backend is built with Flask and PostgreSQL, using JWT-based authentication and MailJet for transactional emails.
+
+## CHECK IT OUT
+
+The app is currently live [HERE](https://polling-app-1yvh.onrender.com)
+
+Notes:
+It uses Render's free tier service; therefore, it may be necessary to wait for the app to wake up. Make sure your browser allows third-party cookies.
+
+## DEVELOPMENT
+
+Clone the repo
 ```
+git clone https://github.com/mdanielamartin/polling-app.git
+```
+Navigate to the frontend directory
+`cd frontend`
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Install dependencies
+`npm install`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Start development server
+`npm run dev`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+This is a Next.js project bootstrapped with create-next-app.
+Open http://localhost:3000 with your browser to see the result.
 
-## Learn More
+You can start editing the page by modifying app/page.tsx. The page auto-updates as you edit the file.
+
+Learn More
 
 To learn more about Next.js, take a look at the following resources:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- Next.js Documentation
+- Learn Next.js
+- Next.js GitHub Repository
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## BACKEND SETUP
 
-## Deploy on Vercel
+Navigate to the backend directory
+`cd backend`
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+(Optional) Create a virtual environment
+```
+conda create -n name python=3.11
+conda activate name
+or
+python -m venv venv
+or
+source venv/bin/activate  (On Windows: venv\Scripts\activate)
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Install dependencies
+`pip install -r requirements.txt`
+
+## DATABASE
+
+Make sure PostgreSQL is installed and running.
+
+ENVIRONMENT VARIABLES
+
+Set environment variables for dev mode:
+`cp .env.example .env`
+
+Then update your .env file:
+```
+DATABASE_URL=postgresql://username:password@localhost:5432/polling_app_db
+MAIL_KEY=your_mailjet_api_key
+MAIL_SECRET=your_mailjet_secret_key
+FRONTEND_URL=http://localhost:3000
+BACKEND_URL=http://localhost:5000
+```
+
+## RUN THE SERVER
+```
+export FLASK_APP=app.py
+export FLASK_ENV=development
+flask run
+```
+
+
+
